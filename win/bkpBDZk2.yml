@@ -72,7 +72,7 @@
       vars:
         ansible_become: yes
         ansible_become_method: runas
-        ansible_become_user: CIN\Administrator
+        ansible_become_user: LOCAL\Administrator
         ansible_become_pass: '{{ vault_domain }}'
       with_items: '{{ info.files }}'
       async: 1800

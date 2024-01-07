@@ -1,0 +1,29 @@
+- name: Instalação Helm
+  hosts: [linG1]
+
+  tasks:
+  - name: Download the Helm.
+    get_url: 
+      url: https://get.helm.sh/helm-v3.8.2-linux-amd64.tar.gz
+      dest:  /tmp/helm-v3.8.2-linux-amd64.tar.gz
+
+  - name: Unarchive the installer.
+    unarchive: 
+      src: /tmp/helm-v3.8.2-linux-amd64.tar.gz
+      dest: /tmp 
+      remote_src: yes
+
+  - name: Crete Helm command terminal shortcut
+    copy:
+      src: /tmp/linux-amd64/helm
+      dest: /usr/local/bin
+      mode: '0777'
+      remote_src: yes
+
+
+
+
+
+
+
+  

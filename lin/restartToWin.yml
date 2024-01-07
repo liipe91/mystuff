@@ -1,0 +1,52 @@
+- name: TROCAR DE LINUX PARA WINDOWS
+  hosts: lin
+
+  tasks:
+    - name: Testar Ping
+      raw: ping '{{ inventory_hostname }}' -c3
+      register: resping
+      delegate_to: localhost
+      changed_when: resping.rc == 0
+      failed_when: resping.stderr != ""
+
+    - name: Retirar máquina que não respondeu
+      block:
+        - debug: msg='{{ inventory_hostname }} não respondeu'
+        - meta: end_host
+      when: resping.rc != 0 or
+            resping.stdout is search("Destination Host Unreachable")
+    
+    - name: Setar valor TTL (Windows maior que 100, Linux menor que 65)
+      set_fact: ttl={{ resping.stdout.split()[13].split('=')[1] }}
+
+    - name: Retirar máquina Windows
+      block:
+        - debug: msg='{{ inventory_hostname }} está no Windows'
+        - meta: end_host
+      when: ttl|int > 100
+
+    - name: Alterar grub para o Windows
+      command: grub-reboot 1
+      # notify:
+      #   - Restart
+
+    - name: Checar informações usuários logados
+      shell: w 
+      register: user_info
+        
+    - name: Reiniciar o {{ inventory_hostname }} Linux e aguardar o porta WinRM do Windows
+      block:
+        - name: Reiniciar (Linux)
+          shell: sleep 2 && shutdown -r now
+          async: 5
+          poll: 0 
+        - name: Aguardar porta WinRM "{{ deployLabWin }}"
+          wait_for:
+            connect_timeout: 30
+            delay: 60
+            host: '{{ inventory_hostname }}'
+            port: 5986
+            sleep: 15
+            timeout: 2400
+          delegate_to: localhost
+      when: user_info.stdout_lines[2] is undefined

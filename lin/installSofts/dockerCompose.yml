@@ -1,0 +1,47 @@
+- name: INSTALAÇÃO DOCKER-COMPOSE
+  hosts: linG2
+
+  vars:
+    url_docker_compose: https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-Linux-x86_64
+
+  tasks:
+  - name: Install uidmap
+    apt:
+      name: uidmap
+      state: present
+      
+  - name: Install docker-compose
+    get_url: 
+      url: '{{ url_docker_compose }}' 
+      dest: /usr/local/bin/docker-compose
+      mode: 'u+x,g+x,o+x'
+  
+  - name: Add usuário tempest no subuid e subgid
+    lineinfile:
+      path: '{{ item}}'
+      state: present
+      # regexp: "^%\\#Aliases XAMPP$"
+      line: "tempest:1000000000:65536"
+    loop:
+      - /etc/subuid
+      - /etc/subgid
+
+  # - name: Add usuário tempest no subuid e subgid
+  #   lineinfile:
+  #     path: '{{ item}}'
+  #     state: absent
+  #     # regexp: "^%\\#Aliases XAMPP$"
+  #     line: "1781848671:1000000000:65536"
+  #   loop:
+  #     - /etc/subuid
+  #     - /etc/subgid
+
+  # - name: Add usuário tempest no subuid e subgid
+  #   lineinfile:
+  #     path: '{{ item}}'
+  #     state: present
+  #     # regexp: "^%\\#Aliases XAMPP$"
+  #     line: "1781848671:100000000:65536"
+  #   loop:
+  #     - /etc/subuid
+  #     - /etc/subgid      

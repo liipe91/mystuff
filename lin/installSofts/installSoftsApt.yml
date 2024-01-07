@@ -1,0 +1,37 @@
+- name: REMOCAO REPO PBIS ANTIGO E INSTALACAO NASMans, QEMU, Pthreads, GCC, Gnome-Tweaks, Emacs
+  hosts: lin
+
+  tasks:
+    # - name: Manter sempre Linux como primeira opção Grub
+    #   import_tasks: setGrub.yml
+
+    # - name: Remover repositório pbis
+    #   apt_repository:
+    #     repo: deb https://repo.pbis.beyondtrust.com/apt pbise non-free
+    #     state: absent
+    #     update_cache: yes
+
+    - name: Instalar nasm, qemu, qemu-system-i386, gcc, pthreads, gnome-tweaks, emacs
+      apt:
+        # name: '{{ item }}'
+        name:
+          - nasm
+          - qemu
+          - qemu-system-i386
+          - gcc
+          - libpthread-stubs0-dev
+          - gnome-tweaks
+          - emacs        
+        state: present
+      # loop:
+        # - nasm
+        # - qemu
+        # - qemu-system-i386
+        # - gcc
+        # - libpthread-stubs0-dev
+        # - gnome-tweaks
+        # - emacs
+
+  handlers:
+  - name: update grub
+    command: update-grub2

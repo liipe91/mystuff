@@ -1,0 +1,21 @@
+- hosts: g1c16 g1c18 g1c47
+
+  tasks:
+    - name: Add GPG key VSCode
+      get_url:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        dest: /etc/apt/trusted.gpg.d/
+        mode: '0644'
+        force: true
+        
+    - name: Importar respositorio do vscode
+      apt_repository: 
+        repo: 'deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/microsoft.asc] https://packages.microsoft.com/repos/vscode stable main'
+        filename: vscode
+        update_cache: yes
+        state: present
+
+    - name: Instalar VSCode
+      apt:
+        name: code
+        state: present

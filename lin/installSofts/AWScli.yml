@@ -1,0 +1,23 @@
+- name: Instalação AWScli
+  hosts: [linG2] 
+
+  tasks:
+  - name: Install package dependencies.
+    package: 
+      name: unzip 
+      state: present
+
+  - name: Download the awscli.
+    get_url: 
+      url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip 
+      dest:  /tmp/awscliv2.zip
+
+  - name: Unarchive the installer.
+    unarchive: 
+      src: /tmp/awscliv2.zip 
+      dest: /tmp 
+      remote_src: yes
+
+  - name: Install awscli package.
+    command: sh /tmp/aws/install 
+  

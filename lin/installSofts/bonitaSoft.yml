@@ -1,0 +1,88 @@
+- name: REMOCAO REPO PBIS ANTIGO E INSTALACAO NASMans, QEMU, Pthreads, GCC, Gnome-Tweaks, Emacs
+  hosts: VMtest
+
+  vars:
+    base_url_bonita: https://github.com/bonitasoft/bonita-platform-releases/releases/latest
+
+  tasks:
+    - name: Get content
+      uri: 
+        url: '{{ base_url_bonita }}'
+        method: GET
+        return_content: yes
+      register: data
+
+    # - set_fact:
+    #     file_name_bonita: "{{ data.content | regex_search('\/Bonita(.*)x86_64\.exe') }}"
+
+    - debug: msg="{{ data.content | regex_search('\/Bonita(.*)x86_64\.run') | regex_replace('/','\') }}"
+      register: file_name_bonita
+
+    # - set_fact:
+    #     latest_version_bonita: "{{ data.content | regex_search('\/Bonita(.*)x86_64\.exe') | regex_search('\-(.*)\-x', '\\1') }}"
+
+    - debug: msg="{{ data.content | regex_search('\/Bonita(.*)x86_64\.run') | regex_search('\-(.*)\-x', '\\1')}}"
+      register: latest_version_bonita
+
+    # - set_fact:
+    #     url_bonita: "{{ base_url_bonita | regex_replace ('latest','download') }}/{{ latest_version_bonita[0] }}{{ file_name_bonita }}"
+
+    - debug: msg="{{ base_url_bonita | regex_replace('latest','download') }}/{{ latest_version_bonita.msg[0] }}/{{ file_name_bonita.msg }}"
+      register: full_url_latest_bonita
+
+    # - debug: msg="{{ full_url_latest_bonita.msg }}"
+
+    #- debug: msg={{ full_url_latest | regex_search('processing-4(.*)z')}}
+    - debug: msg={{ full_url_latest_bonita.msg | basename}}
+      register: file_name
+
+    - name: baixando processing IDE
+      get_url:
+        # Ideia: para não precisarmos sempre pegar o link da última versão, podemos pensar numa forma de automatizar isso também
+        # Ex.: Com o resultado do comando curl -L https://github.com/processing/processing4/releases/latest | grep -E "linux-x64.tgz"
+      
+        url: '{{ full_url_latest_bonita.msg }}'
+        dest: /tmp/{{ file_name.msg }}
+        mode: '744'
+
+    - name: Instalar BonitaSoft.run
+      shell: /tmp/{{ file_name.msg }} --mode unattended
+      register: install_bonita
+      failed_when: 
+        - install_bonita.rc == 1 
+        # - install_bonita.stderr is defined
+        - "'FAILED' in install_bonita.stderr"
+
+    - debug: msg="{{ data.content | regex_search('\/Bonita(.*)x86_64\.run') | regex_replace('\-x86_64\.run','') | regex_replace('/','') }}"
+      register: dir_name_bonita
+
+    - name: criando atalho no menu
+      copy:
+        dest: /usr/share/applications/bonitasoft.desktop
+        content: | 
+          [Desktop Entry]
+          Type=Application
+          Name=Bonita Soft
+          GenericName=BonitaSoft
+          Comment=Open Source stack
+          Exec=/opt/{{ dir_name_bonita.msg }}
+          Icon=/opt/{{ dir_name_bonita.msg }}/bonitasoft-icon-128-128-transparent.png
+          Terminal=false
+          Categories=Development;IDE;Programming;
+          MimeType=text/x-bonitasoft;
+          Keywords=sketching;software;animation;programming;coding;
+          StartupWMClass=bonitasoft-app-ui-Splash
+
+
+
+
+  # [Desktop Entry]
+  # Version=1.0
+  # Encoding=UTF-8
+  # Name=BonitaStudioCommunity-2022.1-u0
+  # GenericName=BonitaStudioCommunity-2022.1-u0
+  # Comment=Starts Bonita Community
+  # Exec=/home/felipe/BonitaStudioCommunity-2022.1-u0/BonitaStudioCommunity
+  # Icon=/home/felipe/BonitaStudioCommunity-2022.1-u0/bonitasoft-icon-128-128-transparent.png
+  # Terminal=false
+  # Type=Application

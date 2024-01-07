@@ -48,7 +48,7 @@
 
     - name: Download imagem via SCP
       cli_command:
-        command: "scp2 vr vr-default efo2@172.21.2.90:{{ version_new }}.xos {{ version_new }}.xos"
+        command: "scp2 vr vr-default user@172.0.0.1:{{ version_new }}.xos {{ version_new }}.xos"
         check_all: True
         prompt:
           - "user@172.0.0.1's password: "

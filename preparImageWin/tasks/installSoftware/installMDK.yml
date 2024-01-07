@@ -1,0 +1,57 @@
+# - name: Get content
+#   win_uri: 
+#     url: https://www.keil.com/demo/eval/arm.htm
+#     method: GET
+#     return_content: yes
+#   register: data
+
+# - debug: msg="{{ data.content | regex_search('Version [0-9]*\.[0-9]+') | replace('.','') | replace('Version ','') }}"
+#   register: version
+
+# Necessário captar o link manualmente
+# https://www.keil.com/demo/eval/arm.htm
+# https://www.keil.com/demo/eval/arm.htm#!#DOWNLOAD
+
+# Verifcar formação do link
+- name: Instalar MDK ARM
+  win_package:
+    path: https://www.keil.com/fid/l3e6pvw1y9wj1wzp54w13mu1v1li6y2wdvmud1/files/eval/mdk538a.exe
+    product_id: auto
+    arguments: --batch-install -P"C:\Users\Public\Desktop\Packs" -F"software" -L"Labs" -O"CIN" -E"software_labs@local.com"
+
+# - name: Criar shortcut uVision5
+#   win_shortcut:
+#     src: C:\Users\Public\Desktop\Packs\UV4\UV4.exe
+#     dest: C:\Users\Public\Desktop\Keil uVision5.lnk
+#     icon: C:\Users\Public\Desktop\Packs\UV4\UV4.exe,0
+
+# Verifcar formação do link
+- name: Instalar KEIL C51
+  win_package:
+    path: https://www.keil.com/fid/oojvsjwrommj1wettpw1ty14um36hujmo9yxd1/files/eval/c51v961.exe
+    product_id: auto
+    arguments: --batch-install -P"C:\Keil_v5" -F"software" -L"Labs" -O"CIN" -E"software_labs@local.com"
+
+- name: Criar shortcut PackInstaller
+  win_shortcut:
+    src: C:\Users\Public\Desktop\Packs\UV4\PackInstaller.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\PackInstaller.lnk
+    icon: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\PackInstaller.exe,0
+
+- name: Instalar DRIVER USB
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/KeilDriver
+    dest: C:\Users\Public\Desktop\
+
+# https://www.keil.com/fid/gsgs9gw1y9wj1wxwvuw1691ew1361dgwsye6d1/files/eval/mdk537.exe
+
+# Command
+# --batch-install | Skips all dialogs except from the progress dialog. Implicitly accepts license terms (see note below).
+# -P | Installation destination directory.
+# -F | Customer's first name.
+# -L | Customer's last name.
+# -E | Customer's email address.
+# -O | Customer's company name.
+# EXEMPLE:  MDKxyz.exe --batch-install -P"c:\Keil_v5" -F"John" -L"Doe" -O"ACME" -E"jd@acme.com"
+
+# Worked for me with MDK537.EXE.

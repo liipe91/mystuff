@@ -1,0 +1,27 @@
+# GHC - Haskell
+- name: Encontrar versão GHC
+  win_shell: "choco list --id-starts-with ghc"
+  register: find_ghc_version
+
+- name: "Setar versão encontrada {{ find_ghc_version.stdout_lines | select('regex', '^ghc') | first }}"
+  set_fact:
+    ghc_version: "{{ find_ghc_version.stdout_lines | select('regex', '^ghc') | first }}"
+
+# - debug: var=ghc_version
+
+- name: Setar GHC Path D:\tools\{{ ghc_version | replace (' ','-') }}\bin
+  set_fact:
+    ghc_path: D:\tools\{{ghc_version | replace (' ','-')}}\bin
+
+- name: 'Adicionar variavel {{ ghc_path }}'
+  win_path:
+    elements: '{{ ghc_path }}'
+
+
+#C++ 
+- name: Adicionar o C++ nas Variaveis
+  win_path: 
+    elements: 
+    - C:\Program Files\CodeBlocks\MinGW\bin
+
+    

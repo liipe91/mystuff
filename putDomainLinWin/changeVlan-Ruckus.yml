@@ -1,0 +1,88 @@
+- name: Identificar porta no Extreme e Substituir Vlan
+  #G1 ruckus105
+  #G2 ruckus106
+  #G3 ruckus107
+  #G4 ruckus108
+  #G5 ruckus109 | ruckus110
+  #LabHw <definir>
+  #LabPos <definir>
+  #SuporteTestes extreme21
+  hosts: "{{ swLab }}"
+  gather_facts: no
+  # strategy: linear # Mitogen incompatível
+
+  vars:
+    vlanFog: {nome: NetE_Fog, numero: 91}
+    vlanLab: {nome: NetI_Labs, numero: 22}
+    vlanHw: {nome: NetI_LabHw, numero: 26}
+    vlanPos: {nome: NetI_Posgrad, numero: 28}
+    portUplink: 1/3/4
+  
+  tasks:
+    - name: Setar MAC para Ruckus
+      set_fact: macpc={{ hostvars[clientFog]['macpc'] | regex_replace('[:]', '') | regex_replace('(.{4})', '\\1.') | regex_replace('(.*).$', '\\1') | lower }}
+
+    - debug: msg={{ macpc }}
+    
+    - name: Setar nome para Ruckus
+      set_fact: namepc={{ hostvars['fog-labs']['namepc'] }}
+
+    - debug: msg={{ namepc }}
+          
+    - name: Identificar porta do namepc em "{{ inventory_hostname }}"
+      icx_command:
+        commands: show mac-address {{ macpc }}
+      register: result
+
+   # - meta: end_host
+
+    - set_fact: vlanNumber={{ result.stdout_lines[0][2] | regex_search( 'Dynamic      [0-9]+') | regex_replace('Dynamic      ','') }}
+
+    - set_fact: portpc={{ result.stdout_lines[0][2] | regex_search('([0-9]+(/[0-9]+)+)')}}
+
+    - debug: msg="{{ namepc }} - Porta {{ portpc }} - Vlan {{ vlanNumber }}"
+
+    # - set_fact: vlanLab={{ vlanHw }}
+    #   when: swLab is search("A NOMEAR") or swLab is search("A NOMEAR")
+    
+    - name: Verificar porta uplink
+      block:
+        - debug: msg="A máquina foi encontrada na porta Uplink"
+        - meta: end_host
+      when:
+        - vlanNumber == '91'
+        - portpc == portUplink
+
+    - name: Trocar Vlan
+      block:
+        - name: Desabilitar porta {{ portpc }}
+          icx_interface:
+            name: ethernet {{ portpc }}
+            enabled: false
+
+        - name: Remover vlan {{ vlanFog.name }} e Adicionar vlan {{ vlanLab.nome }}
+          icx_config:
+            lines: 
+            - vlan {{ vlanFog.numero }}
+            - no untagged ethernet {{ portpc }}
+            - vlan {{ vlanLab.numero }}
+            - untagged ethernet {{ portpc }}
+          register: removeFog
+
+        - name: Habilitar porta {{ portpc }}
+          icx_interface:
+            name: ethernet {{ portpc }}   
+            enabled: true
+          when:
+            - removeFog is success
+      # when:
+      #   - vlanNumber == '91'
+      #   - portpc != portUplink     
+
+    - name: Salvar config Switch
+      icx_config:
+        save_when: modified
+
+    #   # Não aceita pause em strategy free    
+    # - name: Aguardar um tempo para Linux requisitar IP
+    #   pause: seconds=20

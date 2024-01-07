@@ -1,0 +1,130 @@
+# https://learn.microsoft.com/en-us/windows/wsl/install-manual#step-4---download-the-linux-kernel-update-package
+
+# # Step 1 - Enable the Windows Subsystem for Linux
+# - name: Enable the Windows Subsystem for Linux
+#   win_shell: dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+
+# # Step 2 - Check requirements for running WSL 2
+# # For x64 systems: Version 1903 or later, with Build 18362 or later.
+# # For ARM64 systems: Version 2004 or later, with Build 19041 or later.
+
+# # Step 3 - Enable Virtual Machine feature
+# - name: Enable Virtual Machine feature
+#   win_shell: dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+
+# Step 4 - Download the Linux kernel update package
+- name: Move the Linux kernel update package
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/repair/docker/wsl_update_x64.msi
+    dest: C:\Users\Administrator\Documents\wls.msi
+
+- name: Run installer WSL2
+  win_package:
+    path: C:\Users\Administrator\Documents\wls.msi
+    product_id: auto
+    state: present
+    arguments: /quiet /norestart
+    expected_return_code: [0, 1603]
+
+- name: Update WSL
+  win_shell: "wsl --update"
+  ignore_errors: yes
+
+# # Step 5 - Set WSL 2 as your default version
+# - name: Set WSL 2 as your default version
+#   win_shell: wsl --set-default-version 2
+#   register: wsl_install
+#   changed_when:
+#     - wsl_install.stderr != ""
+#     - wsl_install.rc == 0 or wsl_install.rc == 1603
+
+- name: Remove installer
+  win_file:
+    path: C:\Users\Administrator\Documents\wls.msi
+    state: absent
+
+- name: Correcao erro Docker
+  win_shell: "bcdedit /set hypervisorlaunchtype auto"
+
+
+
+# Windows (R) Installer. V 5.0.19041.1
+
+# msiexec /Option <Parâmetro_Necessário> [Parâmetro Opcional]
+
+# Opções de Instalação
+#  </package | /i> <Produto.msi>
+#  Instala ou configura um produto
+#  /a <Produto.msi>
+#  Instalação administrativa - Instala um produto na rede
+#  /j<u|m> <Produto.msi> [/t <Lista de Transformação>] [/g <ID_Idioma>]
+#  Divulga um produto - m para todos os usuários, u para o usuário atual
+#  </uninstall | /x> <Produto.msi | CódigoProduto>
+#  Desinstala o produto
+# Opções de Exibição
+#  /quiet
+#  Modo silencioso, sem interação do usuário
+#  /passive
+#  Modo autônomo - somente barra de progresso
+#  /q[n|b|r|f]
+#  Define o nível da interface do usuário
+#  n - Sem interface do usuário
+#  b - Interface do Usuário básica
+#  r - Interface do Usuário reduzida
+#  f - Interface do Usuário completa (padrão)
+#  /help
+#  Informações de Ajuda
+# Opções de reinicialização
+#  /norestart
+#  Não reinicia depois que a instalação for concluída
+#  /promptrestart
+#  Solicita que o usuário reinicie, caso necessário
+#  /forcerestart
+#  Sempre reinicia o computador após a instalação
+# Opções de Log
+#  /l[i|w|e|a|r|u|c|m|o|p|v|x|+|!|*] <ArquivoLog>
+#  i - Mensagens de status
+#  w - Avisos não fatais
+#  e - Todas as mensagens de erro
+#  a - Inicialização de ações
+#  r - Registros específicos de ações
+#  u - Solicitações do usuário
+#  c - Parâmetros iniciais de Interface
+#  m - Informações de memória insuficiente ou saída fatal
+#  o - Mensagens de espaço em disco insuficiente
+#  p - Propriedades do terminal
+#  v - Saída detalhada
+#  x - Informações adicionais de depuração
+#  + - Acrescentar ao arquivo de log existente
+#  ! - Mover cada linha para o log
+#  * - Registrar todas as informações, exceto para as opções v e x
+#  /log <ArquivoLog>
+#  Equivalente a /l* <ArquivoLog>
+# Opções de Atualização
+#  /update <Atualização1.msp>[;Atualização2.msp]
+#  Aplica atualização(ões)
+#  /uninstall <GuidCódigoPatch>[;Update2.msp] /package <Produto.msi | CódigoProduto>
+#  Remove atualização(ões) de um produto
+# Opções de Reparo
+#  /f[p|e|c|m|s|o|d|a|u|v] <Produto.msi | CódigoProduto>
+#  Repara um produto
+#  p - somente se o arquivo estiver ausente
+#  o - se o arquivo estiver ausente ou uma versão mais antiga estiver instalada (padrão)
+#  e - se o arquivo estiver ausente ou se uma versão igual ou mais antiga estiver instalada
+#  d - se o arquivo estiver ausente ou uma versão diferente estiver instalada
+#  c - se o arquivo estiver ausente ou checksum não corresponder ao valor calculado
+#  a - força todos os arquivos e serem reinstalados
+#  u - todas as entradas específicas do usuário necessárias (padrão)
+#  m - todas as entradas do Registro específicas do computador necessárias (padrão)
+#  s - todos os atalhos existentes (padrão)
+#  v - executa da origem e rearmazena em cache o pacote local
+# Definição de Propriedades Públicas
+#  [PROPERTY=PropertyValue]
+
+# Consulte o SDK do Windows (R) Installer para obter documentação adicional sobre a
+# sintaxe de linha de comando.
+
+# Copyright (C) Microsoft Corporation. Todos os direitos reservados.
+# Partes deste software são baseadas no trabalho do Independent JPEG Group.
+
+

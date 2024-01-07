@@ -1,0 +1,77 @@
+---
+- name: ATUALIZAÇÃO DE IMAGEM EXTREME
+  #hosts: ext
+
+  vars:
+    version_chassi_lite: "summitlite"
+    version_chassi_x: "summitX"
+    version_patch_new: "16.2.5.4-patch1-25"
+    pass_scp: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+
+  tasks:   
+    - name: Verificar imagem atual
+      exos_command:
+        commands: "show system | grep Image"
+      register: system_image
+
+    - name: Setar patch atual na variável
+      set_fact: version_patch_current={{ system_image.stdout[0].split()[11] }}
+
+    - name: Exibir patch atual
+      debug: var=version_patch_current
+
+    - name: "O {{ inventory_hostname }} será ignorado pois já possui a versão mais recente {{ version_new }}"
+      meta: end_host
+      when: "version_patch_current == version_patch_new"
+
+    - name: Verificar chassi
+      exos_command:
+        commands: "show system | grep Type"
+      register: system_chassi
+
+    - name: Setar versão (summitlite) e novo patch na variável
+      set_fact: version_new={{ version_chassi_lite + '-' + version_patch_new }}
+      when: "'X430' in system_chassi.stdout[0]"
+
+    - name: Setar chassi (summitX) e novo patch na variável
+      set_fact: version_new={{ version_chassi_x + '-' + version_patch_new }}
+      when: "'X440' in system_chassi.stdout[0]"
+
+    - name: Se partição ativa for primary, setar secondary para instalar na partição inativa
+      set_fact: pri_sec="secondary"
+      when: "'primary' in system_image.stdout[0].split()[5]"
+
+    - name: Se partição ativa for secondary, setar primary para instalar na partição inativa
+      set_fact: pri_sec="primary"
+      when: "'secondary' in system_image.stdout[0].split()[5]"
+
+    - name: Download imagem via SCP
+      cli_command:
+        command: "scp2 vr vr-default efo2@172.21.2.90:{{ version_new }}.xos {{ version_new }}.xos"
+        check_all: True
+        prompt:
+          - "user@172.0.0.1's password: "
+        answer:
+          - "{{ pass_scp }}"
+      register: scp_download
+      changed_when: 
+        - "'100%' in scp_download.stdout"
+        - "'Please wait validating image' in scp_download.stdout"
+
+    - name: "Instalar imagem {{ version_patch_new }}"
+      exos_config:
+        lines: install image {{ version_new }}.xos {{ pri_sec }}
+      register: install_image
+      when: scp_download.changed
+
+    - name: Validar imagem nova foi instalada com sucesso
+      exos_command:
+        commands: "show version images"
+      register: installed_image
+      changed_when: version_new in installed_image.stdout[0]
+
+    - name: "Habilitar nova imagem {{ version_patch_new }}"
+      exos_config:
+        lines: use image {{ pri_sec }}
+      when: version_new in installed_image.stdout[0]

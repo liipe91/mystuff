@@ -1,0 +1,100 @@
+# - name: Install Bizagi Modeler
+#   include_tasks: installBizagiModeler.yml # Necessário rodar script manualmente
+#   ignore_errors: yes
+
+# - name: Install LTSpice
+#   include_tasks: installLTSpice.yml # Necessário rodar script manualmente
+#   ignore_errors: yes
+
+# - name: Install Orange3
+#   include_tasks: installOrange3.yml
+#   ignore_errors: yes
+
+# - name: Install GitHubDesktop
+#   include_tasks: installGitHubDesktop.yml
+#   ignore_errors: yes
+
+# - name: Install Npcap
+#   include_tasks: installNpcap.yml
+#   ignore_errors: yes
+
+# - name: Install BonitaSoft
+#   include_tasks: installBonitaSoft.yml
+#   ignore_errors: yes
+  
+# - name: Install SQLDeveloper
+#   include_tasks: installSQLDev.yml
+#   ignore_errors: yes
+
+# - name: Install Burp Suite
+#   include_tasks: installBurpSuite.yml # Testar https://winget.run/pkg/PortSwigger/BurpSuite.Community
+#   ignore_errors: yes
+
+# - name: Install Astah UML
+#   include_tasks: installAstahUML.yml
+#   ignore_errors: yes
+
+- name: Install Microsoft SQL Manag. Studio
+  include_tasks: installMicrosoftSQL.yml
+  ignore_errors: yes
+
+# Testar processadores
+- name: Install MDK-ARM
+  include_tasks: installMDK.yml
+  ignore_errors: yes
+
+- name: Install CompSim
+  include_tasks: installCompSim.yml
+  ignore_errors: yes
+
+- name: Install BMotion Web
+  include_tasks: installBMotionWeb.yml
+  ignore_errors: yes
+
+- name: Install Coq Platform
+  include_tasks: installCoqPlatform.yml
+  ignore_errors: yes
+
+- name: Install Prob
+  include_tasks: installProB.yml
+  ignore_errors: yes
+
+- name: Install AtelierB
+  include_tasks: installAtelierB.yml
+  ignore_errors: yes
+
+- name: Install Visual Studio
+  include_tasks: installVisualStudio.yml # https://winget.run/pkg/Microsoft/VisualStudio.2022.Community-Preview
+  ignore_errors: yes
+
+- name: Install Cisco Packet
+  include_tasks: installCisco.yml
+  ignore_errors: yes
+
+- name: Install Anaconda3
+  include_tasks: installAnaconda3.yml
+  ignore_errors: yes
+
+- name: Install Xampp
+  include_tasks: installXampp.yml
+  ignore_errors: yes
+
+- name: Install MySQL Workbench
+  include_tasks: installWorkbench.yml
+  ignore_errors: yes
+
+- name: Install ModelSim
+  include_tasks: installModelSim.yml
+  ignore_errors: yes
+
+- name: Install Quartus 14
+  include_tasks: installQuartus14.yml
+  ignore_errors: yes
+
+- name: Install MinGW
+  include_tasks: installMingw.yml
+  ignore_errors: yes
+
+- name: Install Postgresql
+  include_tasks: installPostgresql.yml
+  ignore_errors: yes

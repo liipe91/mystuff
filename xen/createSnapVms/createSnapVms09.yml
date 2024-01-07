@@ -1,0 +1,60 @@
+---
+- name: CRIAÇÃO SNAPSHOTS DE TODAS AS VMS XEN
+  hosts: xcpng09
+
+  vars: 
+    snapshot_name: "SnapshotDailyByAnsible"
+
+  tasks: 
+    - name: List all VMs UUID with name {{ snapshot_name }}
+      shell: xe snapshot-list is-a-snapshot=true | grep -B 1 {{ snapshot_name }} | awk '{print $5}' | grep -v '^$'
+      register: list_snap_uuid
+      failed_when: list_snap_uuid.stderr != ""
+      tags: delete_snapshot
+
+    - name: List all Snapshot Name {{ snapshot_name }}
+      shell: xe snapshot-list is-a-snapshot=true | grep {{ snapshot_name }} | awk '{print $4}'
+      register: list_snap_name_label
+      failed_when: list_snap_name_label.stderr != ""
+      tags: delete_snapshot      
+
+    - name: Delete all Snapshots with name {{ snapshot_name }}
+      # command: xe snapshot-destroy snapshot-uuid={{ item.1 }}
+      command: xe snapshot-uninstall snapshot-uuid={{ item.0 }} force=true
+      register: snapshot_destroy_uuid
+      loop: "{{ list_snap_uuid.stdout_lines | zip(list_snap_name_label.stdout_lines) | list }}"
+      tags: delete_snapshot
+
+    - name: List all VMs UUID (xcpng09)
+      shell: xe vm-list power-state=running is-control-domain=false | grep uuid | awk '{print $5}'
+      # removido crachaprint erro "The operation is not allowed when the VM has VUSBs"
+      # shell: xe vm-list power-state=running is-control-domain=false | grep -B 1 crachaprint | grep uuid | awk '{print $5}'
+      # shell: xe vm-list power-state=running is-control-domain=false | grep uuid | awk '{print $5}' | grep -v $(xe vm-list power-state=running is-control-domain=false | grep -B 1 crachaprint | awk '{print $5}' | grep -v "^$")
+      register: list_uuid
+      failed_when: list_uuid.stderr != ""
+      tags: create_snapshot
+      when: inventory_hostname is search('xcpng09')
+
+    - name: List all VMs Name-Label
+      shell: xe vm-list power-state=running is-control-domain=false | grep name-label | awk '{print $4}'
+      register: list_name_label
+      failed_when: list_name_label.stderr != ""
+      tags: create_snapshot
+      when: inventory_hostname is search('xcpng09')
+
+    - name: Create Snapshot
+      command: xe vm-snapshot new-name-label={{ snapshot_name }}-{{ lookup('pipe','date +%Y%m%d%H%M%S') }} vm={{ item.0 }}
+      register: snapshot_uuid
+      loop: "{{ list_uuid.stdout_lines | zip(list_name_label.stdout_lines) | list }}"
+      loop_control:
+        label: "VM UUID: {{ item.0 }} - VM: {{ item.1 }}"
+      tags: create_snapshot
+
+    - name: Ensure Snapshot was created
+      command: xe snapshot-list uuid={{ item.stdout }}
+      register: snapshot_ensure
+      failed_when: snapshot_ensure.stderr != ""
+      loop: "{{snapshot_uuid['results']}}"
+      loop_control:
+        label: "Snapshot UUID: {{ item.stdout }} - VM: {{item.item.1}}"
+      tags: create_snapshot

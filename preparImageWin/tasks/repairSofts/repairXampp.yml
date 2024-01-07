@@ -1,0 +1,27 @@
+- name: Salvar arquivo original
+  win_copy:
+    src: C:\xampp\phpMyAdmin\config.inc.php
+    dest: C:\xampp\phpMyAdmin\config.inc.php-ORIG
+    remote_src: yes
+  
+- name: Copiar arquivo modificado
+  win_copy: 
+    src: /etc/ansible/roles/preparImageWin/files/repair/xampp/config.inc.php
+    dest: C:\xampp\phpMyAdmin\config.inc.php
+
+
+- name: Firewall rule to allow Xampp
+  win_firewall_rule:
+    name: Apache HTTP Server
+    action: allow
+    direction: in
+    program: C:\xampp\apache\bin\httpd.exe
+    state: present
+    enabled: yes
+  ignore_errors: yes
+
+# - name: Shortcut Xampp
+#   win_shortcut:
+#     src: C:\xampp\xampp-control.exe
+#     dest: C:\Users\Public\Desktop\Xampp Control Panel.lnk
+#     icon: C:\xampp\xampp-control.exe,0

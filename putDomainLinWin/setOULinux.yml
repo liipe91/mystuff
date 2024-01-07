@@ -1,0 +1,34 @@
+- name: Setar OU g1
+  set_fact: 
+    ou_path_linux: "OU=UbuntuG1,OU=Grad1,OU=local,OU=com"
+  when: deployLabLin is search("g1")
+
+- name: Setar OU g2
+  set_fact: 
+    ou_path_linux: "OU=UbuntuG2,OU=Grad2,OU=local,OU=com"
+  when: deployLabLin is search("g2")
+
+- name: Setar OU g3
+  set_fact: 
+    ou_path_linux: "OU=UbuntuG3,OU=Grad3,OU=local,OU=com"
+  when: deployLabLin is search("g3")
+
+- name: Setar OU g4
+  set_fact: 
+    ou_path_linux: "OU=UbuntuG4,OU=Grad4,OU=local,OU=com"
+  when: deployLabLin is search("g4")
+
+- name: Setar OU g5
+  set_fact: 
+    ou_path_linux: "OU=UbuntuG5,OU=Grad5,OU=local,OU=com"
+  when: deployLabLin is search("g5")
+
+- name: Setar OU Pesquisa
+  set_fact: 
+    ou_path_linux: "OU=UbuntuP1,OU=P1,OU=local,OU=com"
+  when: deployLabLin is search("p1")
+
+- name: Setar OU Hardware
+  set_fact: 
+    ou_path_linux: "OU=UbuntuHW,OU=Hardware,OU=local,OU=com"
+  when: deployLabLin is search("hw")

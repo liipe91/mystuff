@@ -1,0 +1,32 @@
+- name: Get content
+  win_uri: 
+    url: https://www3.hhu.de/stups/downloads/bmotion/releases/
+    method: GET
+    return_content: yes
+  register: data
+
+- debug: msg="{{ data.content | regex_findall('([0-9]+(\.[0-9]+)+)/') | max }}"
+  register: version
+
+- debug: msg="{{ version.msg | regex_search('([0-9]+(\.[0-9]+)+)') }}"
+  register: latest_version
+
+- name: Download BMotionWeb
+  win_get_url: 
+    url: "https://www3.hhu.de/stups/downloads/bmotion/releases/{{latest_version.msg}}/BMotionWeb-{{latest_version.msg}}-win32-x64.zip"
+    dest: '%TEMP%\BMotionWeb-{{latest_version.msg}}-win32-x64.zip'
+
+- name: Descompactar pasta Disco C
+  win_unzip: 
+    src: '%TEMP%\BMotionWeb-{{latest_version.msg}}-win32-x64.zip'
+    dest: C:\Program Files\
+    delete_archive: yes
+
+- name: Criar shortcut BMotion Web
+  win_shortcut:
+    src: C:\Program Files\BMotionWeb-{{latest_version.msg}}\BMotionWeb.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\BMotionWeb.lnk
+    icon: C:\Program Files\BMotionWeb-{{latest_version.msg}}\BMotionWeb.exe,0
+
+
+# https://www3.hhu.de/stups/downloads/bmotion/releases/0.3.2/BMotionWeb-0.3.2-win32-x64.zip

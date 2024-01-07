@@ -1,0 +1,54 @@
+- name: Ingressar namepc dominio (Linux) e Reiniciar para Windows 
+  hosts: g3c50 #"{{ deployLabLin }}"
+  gather_facts: yes
+  
+  tasks:
+    - name: Renomear "{{ inventory_hostname }}" (Linux)
+      hostname:
+        name: 'u{{ inventory_hostname }}'
+
+    # Pesquisar PRE-TASKS
+    - name: Remover residuos SSH do Ansible
+      shell: "ssh-keygen -f /root/.ssh/known_hosts -R {{ inventory_hostname }}"
+      delegate_to: localhost    
+
+    - name: Remover residuos SSH do Rundeck
+      shell: "ssh-keygen -f /var/lib/rundeck/.ssh/known_hosts -R {{ inventory_hostname }}"
+      delegate_to: localhost    
+  
+    - import_tasks: setOULinux.yml
+
+    - name: Ingressar dominio 
+      import_role:
+        name: mahdi22.linux_joindomain
+
+    - meta: flush_handlers        
+
+    - name: Alterar grub para o Windows
+      command: grub-reboot 1
+      register: resultado_grub
+
+    - name: Reiniciar o Linux e aguardar o porta WinRM do Windows
+      block:
+        - name: Reiniciar (Linux)
+          shell: sleep 2 && shutdown -r now
+          async: 5
+          poll: 0 
+        - name: Aguardar porta WinRM "{{ deployLabWin }}"
+          wait_for:
+            connect_timeout: 30
+            delay: 60
+            host: '{{ inventory_hostname }}'
+            port: 5986
+            sleep: 15
+            timeout: 2400
+          delegate_to: localhost
+        - name: Aguardar 5 segundos para garantir WinRM
+          pause: seconds=5
+      when: resultado_grub.rc == 0  
+      
+- name: Incluir domainWindows.yml
+  import_playbook: domainWindows.yml
+  vars: 
+    # deployLabWin: "{{ hostvars['fog-labs']['namepc'] | upper }}"
+    deployLabWin: "{{ deployLabLin | upper }}"

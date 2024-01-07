@@ -1,0 +1,64 @@
+Node.js -- Choco
+LTspice XVII
+GIT -- Choco
+GitHub Desktop -- Choco
+Docker
+Minikube -- Choco
+Visual Studio
+Visual Studio Code -- Choco
+Code Blocks -- Choco
+Anaconda Python -- Choco
+Pycharm -- Choco
+CLion -- Choco
+GoLand -- Choco
+BonitaSoft
+Bizagi Modeler
+RabbitMQ -- Choco
+XAMPP -- Choco
+Oracle Database
+Oracle 19C
+Glasgow Haskell Compiler -- Choco
+Eclipse -- Choco
+JDeveloper
+Oracle MySQL -- Choco
+Processing 3.5.4 -- Choco
+Arduino 1.8.19 -- Choco
+Pure Data -- Choco
+Wireshark -- Choco
+NPCAP -- DEPENDENCIA PARA WIRESHARK
+Cliente Telnet habilitado
+Sublime Text -- Choco
+PortSwigger Burp
+Matlab
+IBM RSA
+Astah UML
+Docker Desktop -- Choco
+Docker Compose -- Choco
+Keil uVision C51 Evaluation Version
+Jupyter Notebook
+Notepad++ -- Choco
+Quartus
+ModelSim 20.1
+MDK Microcontroller Development Kit
+Netbeans IDE -- Choco
+Atelier B
+ProB
+BMotionWeb
+Coq
+CoqIDE
+Python 3.10 -- Choco
+Adobe Acrobat RC -- Choco
+FoxitReader -- Choco
+Java JDK -- Choco
+Intellij -- Choco
+Microsoft SQL Server / Manag. Studio
+MySQL - Workbench
+PostgreSQL - PGAdmin
+Cisco packet tracer
+VirtualBox -- Choco
+CompSim
+Libreoffice -- Choco
+Firefox -- Choco
+Vim 
+R Language -- Choco
+R IDE -- Choco

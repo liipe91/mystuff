@@ -1,0 +1,5 @@
+- name: Copy folder Arduino to Programs
+  win_copy:
+    src: C:\Users\Administrator\AppData\Local\Programs\Arduino IDE
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\
+    remote_src: yes

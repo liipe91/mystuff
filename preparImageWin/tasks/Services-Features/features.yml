@@ -1,0 +1,53 @@
+# - name: Enable Telnet
+#   win_shell: dism /online /Enable-Feature /FeatureName:TelnetClient
+#   # https://docs.ansible.com/ansible/2.9/modules/win_feature_module.html
+
+# Adicionar 
+- name: Enable Features
+  win_optional_feature:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - TelnetClient
+    - Microsoft-Windows-Subsystem-Linux 
+    - VirtualMachinePlatform
+
+# Remover 
+- name: Disable Features
+  win_optional_feature:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - Printing-XPSSErvices-Features
+    # - Microsoft-Hyper-V-All
+    # - Microsoft-Hyper-V
+    # - Microsoft-Hyper-V-Tools-All
+    # - Microsoft-Hyper-V-Management-PowerShell
+    # - Microsoft-Hyper-V-Hypervisor
+    # - Microsoft-Hyper-V-Services
+    # - Microsoft-Hyper-V-Management-Clients
+
+- name: Desabilitar Fast Startup pelo Registro
+  win_regedit: 
+    path: HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power
+    name: HiberbootEnabled
+    data: 0
+
+- name: Configurar placa de rede para habilitar WoL
+  win_shell: Set-NetAdapterAdvancedProperty -Name "Ethernet" -DisplayName "Wake on Magic Packet" -DisplayValue "Enabled"    
+
+# Hyper-V nas máquinas do precisam estar habilitadas para o Docker Destop funcionar no Windows
+
+- name: Executar script choco-cleaner.ps1
+  win_shell: D:\tools\BCURRAN3\choco-cleaner.ps1
+
+- name: Enable RDP
+  win_shell: reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+
+- name: Enable firewall for Domain, Public and Private profiles
+  win_firewall:
+    state: disabled
+    profiles:
+    - Domain
+    - Private
+    - Public

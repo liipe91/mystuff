@@ -1,0 +1,11 @@
+- name: Instalar pacotes pelo Chococolatey
+  win_chocolatey:
+    name: "{{ item }}"
+    state: latest
+    # skip_scripts: yes
+  register: log_choco
+  loop: "{{ install_softs_choco }}"
+
+# - debug: msg={{ log_choco }}
+
+# - debug: msg={{ log_choco.results[0] }}

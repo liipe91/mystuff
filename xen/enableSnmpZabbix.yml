@@ -1,0 +1,32 @@
+- name: PERMITIR PORTA NO IPTABLES E HABILITAR SNMP
+  hosts: xen
+
+  tasks:
+    - name: Adicionar regra SNMP iptables
+      iptables:
+        action: insert
+        chain: RH-Firewall-1-INPUT
+        comment: Zabbix SNMP
+        destination_port: "161"
+        match: udp
+        jump: ACCEPT
+        protocol: udp
+        rule_num: "11"
+      register: rule
+
+    - name: BACKUP IPTABLES, SALVAR, RESTART IPTABLES E SNMP
+      block:
+        - name: Backup iptables
+          shell: cp /etc/sysconfig/iptables /etc/sysconfig/iptables_$(date "+%Y%m%d%H%M%S")          
+        - name: Salvar novo iptables
+          shell: /usr/sbin/iptables-save > /etc/sysconfig/iptables
+      when: rule.changed
+
+    - name: Restart/Habilitar no boot iptables e SNMP
+      service:
+        name: "{{ item }}"
+        state: restarted
+        enabled: yes
+      with_items:
+        - iptables
+        - snmpd

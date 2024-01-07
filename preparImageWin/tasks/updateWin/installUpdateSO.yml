@@ -1,0 +1,9 @@
+- name: Install all security, critical, and rollup updates without a scheduled task
+  win_updates:
+    category_names: "{{ item }}"
+    log_path: C:\Users\Administrator\AppData\Local\Temp\ansible-windows-update.txt
+    state: installed
+  loop: 
+    - SecurityUpdates
+    - CriticalUpdates
+    - UpdateRollups

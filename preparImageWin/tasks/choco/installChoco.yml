@@ -1,0 +1,72 @@
+- name: Instalar Choco
+  win_shell: |
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+  
+  #refreshenv
+# Criar verificação chocolatey
+
+# Maior prioridade
+- name: Add new internal source
+  win_chocolatey_source:
+    name: chocolocal
+    state: present
+    source: http://choco.local.com/nuget/chocolatey/
+    priority: 20
+
+- name: Ajustar prioridade source chocolatey
+  win_chocolatey_source:
+    name: chocolatey
+    state: disabled
+    source: https://community.chocolatey.org/api/v2/
+    priority: 0  
+
+- name: Remover variavel Choco usuário
+  win_environment:
+    name: '{{ item }}'
+    state: absent
+    level: user
+  loop:
+    - ChocolateyToolsLocation
+    - ChocolateyInstall
+
+- name: Remover variável Choco path
+  win_path:
+    elements: C:\ProgramData\chocolatey\bin
+    state: absent  
+
+- name: Adicionar varival Choco sistema
+  win_environment:
+    name: '{{ item.nome }}'
+    value: '{{ item.caminho }}'
+    state: present
+    level: machine
+  loop:
+    - {nome: ChocolateyToolsLocation, caminho: D:\tools}
+    - {nome: ChocolateyInstall, caminho: D:\ProgramData\chocolatey}
+# ChocolateyToolsLocation -- C:\tools
+# ChocolateyInstall -- C:\ProgramData\chocolatey
+
+- name: Adicionar variável Choco path
+  win_path:
+    elements: D:\ProgramData\chocolatey\bin
+    state: present
+
+- name: Copiar pasta Chocolatey para disco D
+  win_copy:
+    src: C:\ProgramData\chocolatey
+    dest: D:\ProgramData\chocolatey
+    remote_src: yes
+ 
+- name: Criar tools disco D
+  win_file:
+    path: D:\tools
+    state: directory
+
+# Trocar plano de energia do Windows para Alto Desempenho
+- name: Change power plan
+  win_power_plan:
+    name: high performance
+
+- name: Aguardar um minuto após instalação Choco
+  pause:
+    minutes: 1

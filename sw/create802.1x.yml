@@ -1,0 +1,68 @@
+- name: Configurar Acesso 802.1x
+  hosts: extreme20
+ 
+  vars:
+    port_uplink: 48    
+    guest_vlan: # SETAR GUEST-VLAN, PORTA E TAG
+      - { name: 'NetE_GuestWired', port: 38, tag: 97 }
+      # - { name: 'NetI_Mobile', port: 38, tag: 95 }
+    radius_primary: 172.0.0.1
+    radius_secundary: 172.0.0.2
+    radius_port: 1812
+    radius_pass: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+    
+  tasks:
+    - name: Setar variável Extreme IP
+      shell: ping '{{ inventory_hostname}}' -c 1 | head -1 | grep -Eo '[0-9.]{4,}'
+      register: extremeip
+      delegate_to: localhost
+
+    - name: Criar guest-vlan
+      exos_config:
+        lines:
+          # - "create vlan {{ item.name }} tag {{ item.tag }}"
+          - "configure vlan {{ item.name }} add ports {{ port_uplink }} tagged"
+      with_items: '{{ guest_vlan }}'
+    
+    - name: Configurar RADIUS
+      exos_config:
+        lines:
+          - "configure radius netlogin primary server {{ radius_primary }} {{ radius_port }} client-ip {{ extremeip.stdout }} vr VR-Default"
+          - "configure radius netlogin primary shared-secret {{ radius_pass }}"
+          - "configure radius netlogin secondary server {{ radius_secundary }} {{ radius_port }} client-ip {{ extremeip.stdout }} vr VR-Default"
+          - "configure radius netlogin secondary shared-secret {{ radius_pass }}"
+          - "enable radius netlogin"
+
+    - name: Criar authvlan
+      exos_config:
+        lines:
+          - create vlan authvlan tag 2048
+          - configure vlan authvlan ipaddress 192.168.100.254 255.255.255.0
+          - configure netlogin vlan authvlan
+          
+    - name: Configurar Netlogin nas portas
+      exos_config:
+        lines:
+          - enable netlogin dot1x
+          - "enable netlogin ports {{ item.port }} dot1x"
+          - "configure netlogin ports {{ item.port }} no-restart"
+          - "configure netlogin ports {{ item.port }} mode port-based-vlans"
+          - "enable netlogin dot1x guest-vlan ports {{ item.port }}"
+          - "configure netlogin dot1x guest-vlan {{ item.name }} ports {{ item.port }}"
+      with_items: '{{ guest_vlan }}'
+
+    - name: Configurar guest-vlan
+      exos_config:
+        lines:          
+          - "enable netlogin dot1x guest-vlan ports {{ item.port }}"
+          - "configure netlogin dot1x guest-vlan {{ item.name }} ports {{ item.port }}"
+      with_items: '{{ guest_vlan }}'
+
+    - name: Configurar timers netlogin
+      exos_config:
+        lines:
+          - configure netlogin dot1x timers server-timeout 10
+          - configure netlogin dot1x timers quiet-period 10
+          - configure netlogin dot1x timers supp-resp-timeout 5
+          - configure netlogin dot1x timers reauth-period 7200

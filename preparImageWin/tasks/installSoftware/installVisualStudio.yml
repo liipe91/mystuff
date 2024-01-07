@@ -1,0 +1,23 @@
+- name: Get content
+  win_uri: 
+    url: https://visualstudio.microsoft.com/pt-br/vs/community/
+    method: GET
+    return_content: yes
+  register: data
+
+- debug: msg="{{ data.content | regex_search('Visual Studio Community [0-9]+') }}"
+  register: version
+
+- debug: msg="{{ version.msg | replace('Visual Studio Community ','') }}"
+  register: latest_version
+
+- name: Install with Chocolatey
+  win_chocolatey:
+    name: visualstudio{{latest_version.msg}}community
+    state: present
+
+- name: Create Shortcut
+  win_shortcut:
+    src: C:\Program Files\Microsoft Visual Studio\{{latest_version.msg}}\Community\Common7\IDE\devenv.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Visual Studio.lnk
+    icon: C:\Program Files\Microsoft Visual Studio\{{latest_version.msg}}\Community\Common7\IDE\devenv.exe,0

@@ -1,0 +1,10 @@
+- name: Move icon to pictures
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/tasks/shortcutPublic/program.ico
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\
+
+- name: Create shortcut all programs
+  win_shortcut:
+    src: C:\ProgramData\Microsoft\Windows\Start Menu\Programs
+    dest: C:\Users\Public\Desktop\Programs.lnk
+    icon: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\program.ico,0

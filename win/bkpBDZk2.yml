@@ -1,0 +1,107 @@
+- name: Realizar Backup BD server para backupserver
+  hosts: server
+
+  vars:
+    path_src_bkpZks: C:\Backup_Server\
+    path_freenas: \\backupserver.local.com\wbackup\Databases\{{ inventory_hostname }}
+
+  tasks:
+    - name: Identificar os arquivos de Backup ServerCrachaZK
+      ansible.windows.win_find:
+        file_type: file
+        paths: '{{ path_src_bkpZks }}'
+        patterns: 'db_*.sql'
+        get_checksum: no
+      async: 1800
+      poll: 20        
+      register: info      
+
+    - name: Setar variável com total de arquivos para backup
+      set_fact: 
+        end_sequence: '{{info.matched-1}}' # Variável para loop em todos os arquivos
+      when: info.matched > 0
+
+    - name: Compactar e Deletar se existir arquivos de backups    
+      block:    
+      - name: Compactar arquivos identificados
+        win_command: 7z.exe a {{ item.path }}.7z {{ item.path }} -mmt=3 # limita 3 threads (até 35% CPU). No padrão usava mais de 60% CPU 
+        args:
+          executable: cmd
+          chdir: C:\Program Files\7-Zip
+        async: 7200
+        poll: 40
+        with_items: '{{ info.files }}'
+        register: compress
+
+      - name: Identificar os arquivos compactados Backup ServerCrachaZK
+        ansible.windows.win_find:
+          file_type: file
+          paths: '{{ path_src_bkpZks }}'
+          # patterns: '^db_2023.*.sql.7z$'
+          patterns: 'db_*.sql'
+          # patterns: 'db_20230228*.sql.7z'
+          # use_regex: yes
+          get_checksum: no
+        async: 1800
+        poll: 20
+        register: info_compress
+
+      - name: Setar variável com total de arquivos compactados
+        set_fact: 
+          end_sequence_compress: '{{info_compress.matched-1}}' # Variável para loop em todos os arquivos
+        when: info_compress.matched > 0
+
+      - name: Falhar se tamanho do arquivo for menor que 100 MB
+        debug:
+          msg: "Tamanho do arquivo compactado {{ info_compress.files[item|int].size | filesizeformat }}"            
+        failed_when: info_compress.files[item|int].size | filesizeformat < '100.0 MB'
+        with_sequence: start=0 end={{end_sequence_compress}}
+        
+      - name: Deletar backup origem quando a compressão finaliza com sucesso
+        ansible.windows.win_file:
+          path: '{{ compress.results[item|int].item.path }}'
+          state: absent
+        with_sequence: start=0 end='{{end_sequence}}'
+        when: 
+          - compress.results[item|int].rc == 0 
+          - compress.results[item|int].stdout.find('Everything is OK') == -1
+      when: info.matched > 0
+
+    - name: Copiar backup compactado para backupserver
+      win_command: cmd /c "copy {{ item.path }}.7z {{ path_freenas }}"
+      vars:
+        ansible_become: yes
+        ansible_become_method: runas
+        ansible_become_user: CIN\Administrator
+        ansible_become_pass: '{{ vault_domain }}'
+      with_items: '{{ info.files }}'
+      async: 1800
+      poll: 20      
+
+    - name: Identificar backups compactados com mais de 5 dias
+      ansible.windows.win_find:
+        file_type: file
+        paths: '{{ path_src_bkpZks }}'
+        # patterns: '^db_2023.*.sql.7z$'
+        patterns: 'db_*.sql'        
+        # use_regex: yes
+        get_checksum: no
+        age: 5d 
+      async: 1800
+      poll: 20
+      register: infodel      
+
+    - name: Deletar backups compactados com mais de 5 dias
+      block:
+        - name: Setar variável com total de arquivos com mais de 5 dias
+          set_fact: 
+            end_sequence_del: '{{infodel.matched-1}}' # Variável para loop em todos os arquivos          
+
+        - name: Deletar backups compactados com mais de 5 dias
+          ansible.windows.win_file:
+            path: '{{ infodel.files[item|int].path }}'
+            state: absent
+          with_sequence: start=0 end={{end_sequence_del}}
+          async: 1800
+          poll: 30
+      when: infodel.matched > 0

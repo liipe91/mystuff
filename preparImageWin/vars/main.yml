@@ -1,0 +1,78 @@
+---
+allow_users_ssh: user jesp efo2 pvlb wdjs
+
+install_softs_critical_choco:
+
+install_softs_choco:
+  - chocolatey-core.extension
+  - choco-cleaner
+  - autohotkey # dependencia
+  - vcredist140
+  - ghc 
+  - python
+  - nodejs
+  - eclipse 
+  - openjdk
+  # - jdk8
+  - rabbitmq
+  - adobereader
+  - googlechrome
+  - firefox
+  - notepadplusplus.install
+  - 7zip
+  - git
+  - minikube
+  - mingw
+  - vscode
+  - codeblocks
+  - pycharm-community
+  - clion-ide
+  - intellijidea-community
+  - goland
+  - processing
+  - arduino # autohotkey.portable (≥ 1.1.25) chocolatey-core.extension (≥ 1.3.1)
+  - puredata
+  - sublimetext3
+  - docker-desktop
+  - docker-compose
+  # - postgresql
+  - powerbi
+  - netbeans
+  - foxitreader
+  - libreoffice-still
+  - virtualbox
+  - wireshark
+  - r
+  # - r.studio
+  - vim
+  - insomnia-rest-api-client
+  - zoom
+
+base_url_docker_compose: https://github.com/docker/compose/releases/download/v2.12.2/docker-compose-Linux-x86_64  
+
+quartus_installer: QuartusSetup-14.0.0.200-windows.exe
+
+path_installer: C:\InstallQuartus\
+
+path_folder_src: /etc/ansible/files/Hardware/
+
+modelsim_installer: ModelSimSetup-20.1.0.711-windows.exe
+
+path_installer_model: C:\InstallModelSim
+
+base_url_bonita: https://github.com/bonitasoft/bonita-platform-releases/releases/latest
+
+base_url_burp: https://portswigger-cdn.net/burp/releases/download?product=community&version=
+# base_url_burp2: &type=WindowsX64
+# VERSAO&type=WindowsX64
+#
+
+program_filesx86: C:\Program Files (x86)\
+program_files: C:\Program Files\
+folder_temp: C:\Users\Administrator\AppData\Local\Temp\
+
+base_url_compsim: http://compsim.crato.ifce.edu.br/
+
+base_url_coq: https://github.com/coq/platform/releases/
+
+base_url_prob: https://www3.hhu.de/stups/downloads/prob/tcltk/releases/

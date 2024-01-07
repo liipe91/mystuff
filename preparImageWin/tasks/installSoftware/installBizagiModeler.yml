@@ -1,0 +1,37 @@
+#Inserir URL do Download para o bizagi https://portal.bizagi.com/en/bizagi-modeler-download
+#Inserir nome do setup com versão, para renomear
+# MSI colocado em FILES ( baixado manualmente)
+
+
+# Colocar no files
+- name: Url Bizagi
+  set_fact:
+    url_bizagi: /etc/ansible/roles/preparImageWin/files/BizagiModelerSetup_4.0.0014.exe
+
+# - name: Basename installer
+#   set_fact:
+#     version: "{{ url_bizagi | urlsplit('path') | regex_search('Bizagi(.*)exe') }}"
+
+- name: Install Bizagi Modeler
+  win_copy:
+    src: "{{ url_bizagi }}"
+    dest: C:\Users\Public\Desktop\Bizagi.exe 
+
+# # Para o .ahk reconhecer quem abrir
+# - name: Rename file
+#   win_shell: mv C:\Users\Public\Desktop\{{version}} C:\Users\Public\Desktop\Bizagi.exe
+
+- name: Copy Script to Documents
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/installBizagi.exe
+    dest: C:\Users\Administrator\Documents\
+
+# - name: Adicionar atalho
+#   win_shortcut: 
+#     src: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Bizagi Modeler\Modeler\Bizagi Modeler.lnk
+#     dest: C:\Users\Public\Desktop\Bizagi Modeler.lnk
+
+
+# # Script em background não funciona
+# - name: Rodar Script instalação 
+#   win_shell: C:\Users\Administrator\Documents\installBizagi.exe

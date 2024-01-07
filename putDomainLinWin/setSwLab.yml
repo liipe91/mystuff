@@ -1,0 +1,27 @@
+- name: Setar nome na variável swLab
+  set_fact: swLab="{{ G1 }}"
+  when: namepc is search("g1")
+
+- name: Setar nome na variável swLab
+  set_fact: swLab="{{ G2 }}"
+  when: namepc is search("g2")
+
+- name: Setar nome na variável swLab
+  set_fact: swLab="{{ G3 }}"
+  when: namepc is search("g3")
+
+- name: Setar nome na variável swLab
+  set_fact: swLab="{{ G4 }}"
+  when: namepc is search("g4")
+
+- name: Setar nome na variável swLab
+  set_fact: swLab="{{ G5 }}"
+  when: namepc is search("g5")
+
+- name: Setar nome na variável swLab
+  set_fact: swLab="{{ LabHw }}"
+  when: namepc is search("hw")
+
+- name: Setar nome na variável swLab
+  set_fact: swLab="{{ LabPos }}"
+  when: namepc is search("p1")

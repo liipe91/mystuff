@@ -1,0 +1,40 @@
+- name: Identificar MAC e Nome do host
+  hosts: "{{ clientFog }}"
+  gather_facts: yes
+
+  tasks:
+    - name: Remover residuos SSH do Ansible
+      shell: "ssh-keygen -f /root/.ssh/known_hosts -R {{ inventory_hostname }}"
+      delegate_to: localhost
+
+    - name: Remover residuos SSH do Rundeck
+      shell: "ssh-keygen -f /var/lib/rundeck/.ssh/known_hosts -R {{ inventory_hostname }}"
+      delegate_to: localhost
+
+    - name: Setar MAC Address
+      set_fact: macpc={{ ansible_facts['default_ipv4']['macaddress'] }}
+
+    - name: Setar nome da Interface de rede
+      set_fact: interfacerede={{ ansible_facts['default_ipv4']['interface'] }}
+
+    - name: Requisitar novo IP Labs
+      shell: sleep 38 ; dhclient -r ; sleep 5 ; dhclient ; systemctl restart network-manager
+      async: 40
+      poll: 0
+      become: yes 
+
+- name: Incluir findHostname.yml
+  import_playbook: findHostname-Ruckus.yml
+#  import_playbook: findHostname.yml
+
+- name: Incluir changeVlan.yml
+  import_playbook: changeVlan-Ruckus.yml
+  vars: 
+    swLab: "{{ hostvars['fog-labs']['swLab'] }}"
+
+- name: Incluir domainLinux.yml
+  import_playbook: domainLinux.yml
+  vars: 
+    deployLabLin: "{{ hostvars['fog-labs']['namepc'] }}"
+
+    

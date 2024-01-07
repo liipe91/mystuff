@@ -1,0 +1,39 @@
+- name: Copiar Instalador
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/QuartusSetup-14.0.0.200-windows.exe
+    dest: C:\altera\14.0\
+
+- name: Copiar Cyclone
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/cyclone-14.0.0.200.qdz
+    dest: C:\altera\14.0\
+
+- name: Run Quartus installer
+  win_shell: |  
+    Start-Process -Wait -FilePath "C:\altera\14.0\QuartusSetup-14.0.0.200-windows.exe" `
+    -ArgumentList "--mode unattended"
+
+- name: Run Device installer
+  win_shell: |  
+    Start-Process -Wait -FilePath "C:\altera\14.0\quartus\common\devinfo\dev_install\dev_install.exe" `
+    -ArgumentList "--mode unattended --downloaddir C:\altera\14.0\ --installdir C:\altera\14.0"
+  tags: device
+
+- name: Remover instalador
+  win_file:
+    path: C:\Users\Public\Desktop\QuartusSetup-14.0.0.200-windows.exe
+    state: absent
+
+# - name: Adicionar atalho
+#   win_shortcut:
+#     src: "{{ path_quartus }}\quartus"
+#     dest: C:\Users\Public\Desktop\
+
+# - name: Instalar Softs .EXE
+#   win_package:
+#     path: C:\Users\Public\Desktop\QuartusSetup-14.0.0.200-windows.exe
+#     product_id: auto
+#     # arguments: --installdir C:\InstallQuartus\ --unattendedmodeui minimal --mode unattended
+#     arguments: --installdir C:\altera\14.0 --unattendedmodeui minimal --mode unattended
+#     # expected_return_code: [0, 2]
+

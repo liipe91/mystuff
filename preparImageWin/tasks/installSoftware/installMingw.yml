@@ -1,0 +1,27 @@
+- name: Desabilitar troca de senha do usuario suporte
+  win_shell: |
+    Set-LocalUser -Name suporte -PasswordNeverExpires $true
+  become_user: Administrator
+
+- name: Verificar se o pacote mingw está instalado
+  raw: choco list --local-only | findstr mingw
+  register: check_mingw
+  ignore_errors: yes
+
+- block:
+  - name: Remover pacote do repositório local
+    win_shell: choco uninstall mingw --remove-packages -y
+    when: check_mingw.failed != true
+
+  - name: Instalar o MinGW usando Chocolatey
+    win_chocolatey:
+      name: mingw
+      version: '12.2.0'
+      state: present
+
+  - name: Adcionar mingw a variável path
+    win_path:
+      elements:
+        - D:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin
+      state: present
+  when: check_mingw.failed != false or  check_mingw.stdout_lines[0] != 'mingw 12.2.0'

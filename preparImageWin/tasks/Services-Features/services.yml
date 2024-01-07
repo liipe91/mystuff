@@ -1,0 +1,28 @@
+# Setar WinRM Automatico
+- name: Set WinRM Automatic
+  win_service:
+    name: WinRM
+    start_mode: auto
+    state: started
+
+# Reiniciar o serviço para escutar a porta 15672 - reparo Rabbit
+- name: Restart a service RabbitMQ
+  win_service:
+    name: RabbitMQ
+    start_mode: delayed
+    state: restarted
+
+# Trocar local criação novos usuários
+- name: Change profile Directory
+  win_regedit:
+    path: HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList
+    name: ProfilesDirectory
+    data: D:\Users
+
+# Adicionar everyone do grupo docker-users
+- name: Conceder privilegios docker
+  win_group_membership:
+    name: docker-users
+    members: Everyone
+    state: present
+# https://github.com/ansible/ansible/issues/35805

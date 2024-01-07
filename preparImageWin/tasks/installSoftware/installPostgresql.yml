@@ -1,0 +1,38 @@
+- name: remover posgres15
+  win_chocolatey:
+    name: 
+    - postgresql15
+    - postgresql
+    state: absent
+  ignore_errors: yes
+
+- name: reparar instalação do PostgreSQL
+  win_chocolatey:
+    name: postgresql16
+    state: latest
+    pinned: yes
+    # source: https://community.chocolatey.org/api/v2/
+    
+- name: copiar arquivo de configuração postgresql
+  win_copy: 
+    src: /etc/ansible/files/pg_hba.conf
+    dest: C:\Program Files\PostgreSQL\16\data\pg_hba.conf
+
+- name: remover master password pgadmin4
+  win_copy: 
+    src: /etc/ansible/files/config.py
+    dest: C:\Program Files\PostgreSQL\16\pgAdmin 4\web\config.py
+
+- name: nome do servico postgresql
+  win_shell: |
+    Get-Service | Where-Object { $_.DisplayName -like "postgre*" } | Select-Object ServiceName
+  register: service_name
+
+- name: adicionar variável de ambiente
+  win_path:
+    elements: C:\Program Files\PostgreSQL\16\bin
+    
+- name: restart postgresql service  
+  win_service:
+    name: '{{service_name.stdout_lines[3]}}'
+    state: restarted

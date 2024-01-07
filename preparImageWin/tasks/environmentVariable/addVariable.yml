@@ -1,0 +1,106 @@
+# Licença Pesqueira
+- name: Adicionar variável Pesqueira License
+  win_environment:
+    state: present
+    name: LM_LICENSE_FILE
+    value: 27000@license.local.com
+    level: machine
+
+# Python
+- name: Versão Python
+  win_shell: "choco list --id-only --id-starts-with python"
+  register: py_version
+# - debug: msg={{dir_out.stdout_lines[1] | regex_replace ('[3|4] ',"") | replace('.',"") | replace('p','P') | regex_replace('\d$','')}}
+
+# - debug: msg={{py_version.stdout_lines[3]}}
+- name: Setar variavel Latest Version Python
+  set_fact: 
+    # python_version: "{{py_version.stdout_lines[3] | regex_replace ('[3|4] ','') | replace('.','') | replace('p','P') | regex_replace('\\d$','')}}"
+    python_version: "{{py_version.stdout_lines[3] | replace('p','P') }}"
+# - debug: msg={{python_version}}
+
+# 
+- name: Adicionar variavel {{py_version.stdout_lines[1]}} e Pip
+  win_path:
+    elements:
+    - C:\{{python_version}}            #python
+    - C:\{{python_version}}\Scripts    #pip
+
+#MatLab
+- name: Adicionar o Matlab nas variaveis
+  win_path:
+    elements: D:\Program Files\MATLAB\R2022a\bin
+
+# GHC - Haskell
+- name: Versão GHC
+  win_shell: "choco list --id-only --id-starts-with ghc"
+  register: dir_out
+# - debug: msg={{dir_out.stdout_lines[1] | replace (' ',"-")}}
+- debug: msg={{dir_out)}}
+
+- name: Setar variavel Latest Version GHC
+  set_fact: 
+    ghc_version: "{{dir_out.stdout_lines[1] | replace (' ','-')}}"
+
+- name: Adicionar variavel {{ghc_version}}
+  win_path:
+    elements: D:\tools\{{ghc_version}}\bin\
+
+# Quartus14
+- name: Adicionar o Quartus nas Variaveis
+  win_path:
+    elements: D:\ProgramFiles\quartus\altera\14.0
+
+# Minikube
+- name: Adicionar o Minikube nas Variaveis
+  win_path:
+    elements: D:\ProgramData\chocolatey\lib\Minikube\tools
+
+# GitHub Desktop
+- name: Adicionar o GitHub Desktop nas Variaveis
+  win_path:
+    elements: C:\Users\Administrator\AppData\Local\GitHubDesktop\bin
+
+# RabbitMQ
+# Adicionar RabbitMQ / RabbitMQ Server nas Variaveis
+- name: Versão do RabbitMQ
+  win_shell: choco list --id-only --id-starts-with rabbitmq
+  register: rabbit_version
+
+- name: Setar variavel Latest Version rabbit_version.stdout_lines[1]
+  set_fact:
+    rabbitMQ_version: "{{ rabbit_version.stdout_lines[1] | regex_replace (' ','_server-') }}"
+
+- name: Adicionar variável RabbitMQ Server
+  win_environment:
+    state: present
+    name: RABBITMQ_SERVER
+    value: C:\Program Files\RabbitMQ Server\{{rabbitMQ_version}}
+    level: machine
+
+- name: Adicionar RabittMQ nas variaveis
+  win_path:
+    elements: '%RABBITMQ_SERVER%\sbin'
+
+#END - RabbitMQ
+
+#Node.Js
+- name: Adicionar o Node.Js nas Variaveis
+  win_path:
+    elements: C:\Program Files\nodejs\
+
+#Npcap
+- name: Adicionar o Npcap nas Variaveis
+  win_path: 
+    elements: C:\Program Files\Npcap
+
+#C++ 
+- name: Adicionar o C++ nas Variaveis
+  win_path: 
+    elements: 
+    - C:\Program Files\CodeBlocks\MinGW\bin
+
+#Docker
+- name: Setar variavel
+  win_path:
+    elements: C:\Program Files\Docker\Docker\resources\bin

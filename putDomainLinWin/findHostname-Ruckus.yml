@@ -1,0 +1,42 @@
+- name: Identificar nome do host pelo arquivo DHCP Fog
+  hosts: fog-labs
+  strategy: linear
+  become: yes
+
+  vars:
+    G1: ruckus105
+    G2: ruckus106
+    G3: ruckus107
+    G4: ruckus108
+    G5: ruckus109 # stack ruckus110
+    LabHw: ruckus130
+    LabPos: ruckus124
+  
+  tasks:
+    - name: Identificar nome do host pelo arquivo DHCP Fog
+      shell: grep "{{ clientFog }}" /etc/dhcp/clonezilla.txt | grep -v "^#" | head -c +5
+      register: resname
+
+    - name: Setar nome na variável namepc
+      set_fact: namepc={{ resname.stdout }}
+
+    - name: Remover chave SSH do host
+      shell: ssh-keygen -f /root/.ssh/known_hosts -R {{ namepc }}  
+      delegate_to: localhost
+
+    - name: Incluir setSwLab.yml
+      import_tasks: setSwLab.yml
+
+    - debug: var=swLab      
+    - debug: var=namepc
+
+    - name: Adicionar host no inventário deployLabLin
+      add_host: 
+        name: '{{ namepc }}'
+        groups: deployLabLin
+
+
+    - name: Adicionar host no inventário deployLabWin
+      add_host: 
+        name: '{{ namepc | upper }}'
+        groups: deployLabWin

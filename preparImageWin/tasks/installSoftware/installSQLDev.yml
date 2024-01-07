@@ -1,0 +1,10 @@
+- name: Copiar SQLDeveloper para disco D
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/dev/sqldeveloper/
+    dest: D:\SQLDeveloper\sqldeveloper\
+
+- name: Criar shortcut Public
+  win_shortcut:
+    src: D:\SQLDeveloper\sqldeveloper\sqldeveloper.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\SQL Oracle Developer.lnk
+    icon: D:\SQLDeveloper\sqldeveloper\sqldeveloper.exe,0

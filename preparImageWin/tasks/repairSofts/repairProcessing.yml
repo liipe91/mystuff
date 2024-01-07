@@ -1,0 +1,5 @@
+- name: Copy folder Processing to Programs
+  win_copy:
+    src: D:\ProgramData\chocolatey\lib\Processing
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\
+    remote_src: yes

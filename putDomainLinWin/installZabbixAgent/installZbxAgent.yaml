@@ -1,0 +1,47 @@
+---
+- name: Copiar pasta "{{ new_folder }}" para C:\zabbix
+  win_copy:
+    src: "{{ new_folder }}"
+    dest: C:\zabbix
+  vars: 
+    new_folder: "/etc/ansible/playbooks/labs/domain/installZabbixAgent/zabbix_agent-5.0.4/" # Manter a barra pois faz diferença.
+
+- name: Executar tarefas com base em deployLabWin
+  block:
+    - name: Substituir Server
+      win_lineinfile:
+        path: C:\zabbix\conf\zabbix_agentd.win.conf
+        line: "Server=zabbix-labshw.local.com"
+        backrefs: true
+        regexp: "Server=zabbix-labs.local.com"
+      when: deployLabWin is search("HW")
+
+    - name: Substituir ServerActive  
+      win_lineinfile:
+        path: C:\zabbix\conf\zabbix_agentd.win.conf
+        line: "ServerActive=zabbix-labshw.local.com"
+        backrefs: true
+        regexp: "ServerActive=zabbix-labs.local.com"
+  when: deployLabWin is search("HW")
+
+
+
+- name: Instalar Zabbix Agent
+  win_shell: C:\zabbix\bin\zabbix_agentd.exe --install -c C:\zabbix\conf\zabbix_agentd.win.conf
+  ignore_errors: yes
+
+- name: Iniciar serviço Zabbix Agent
+  win_service:
+    name: "Zabbix Agent"
+    state: started
+  register: service_status
+  tags: start
+  ignore_errors: yes  
+
+# - name: Remover zabbix-OLD
+#   win_file:
+#     path: C:\zabbix-OLD
+#     state: absent
+#   ignore_errors: yes
+
+  

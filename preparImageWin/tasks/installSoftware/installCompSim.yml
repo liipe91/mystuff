@@ -1,0 +1,26 @@
+- name: Get content
+  win_uri: 
+    url: "{{ base_url_compsim }}/download.html"
+    method: GET
+    return_content: yes
+  register: data
+
+- debug: msg='{{ data.content | regex_search('CompSim ([0-9]+(\.[0-9]+)+)[a-zA-Z]+ version is available') | replace('CompSim ','') | replace(' version is available','') }}'
+  register: compsim_version
+
+- name: Download CompSim
+  win_get_url: 
+    url: "{{ base_url_compsim }}releases/CompSim_v{{compsim_version.msg}}-Win64.zip"
+    dest: '%TEMP%\CompSim_v{{compsim_version.msg}}-Win64.zip'
+
+- name: Descompactar pasta Disco C
+  win_unzip: 
+    src: '%TEMP%\CompSim_v{{compsim_version.msg}}-Win64.zip'
+    dest: C:\Program Files\
+    delete_archive: yes
+
+- name: Criar shortcut CompSim
+  win_shortcut:
+    src: C:\Program Files\CompSim_v{{compsim_version.msg}}-Win64\CompSim.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\CompSim.lnk
+    icon: C:\Program Files\CompSim_v{{compsim_version.msg}}-Win64\CompSim.exe,0

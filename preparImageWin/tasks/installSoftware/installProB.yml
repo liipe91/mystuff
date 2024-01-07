@@ -1,0 +1,69 @@
+- name: Get content
+  win_uri: 
+    url: "{{ base_url_prob }}"
+    method: GET
+    return_content: yes
+  register: data
+
+- debug: msg="{{ data.content | regex_findall('([0-9]+(\.[0-9]+)+)/') | last}}"
+  register: version
+
+# - name: Latest Version ProB
+#   set_fact:
+#     latest_version: "{{ version.msg | regex_search('([0-9]+(\.[0-9]+)+)') }}"
+
+- debug: msg="{{ version.msg | regex_search('([0-9]+(\.[0-9]+)+)') }}"
+  register: latest_version
+
+- name: Url Release
+  set_fact:
+    url_release: "{{ base_url_prob }}{{ latest_version.msg }}/"
+
+- name: Filename of ProB
+  set_fact:
+    file_name: ProB.windows64.zip
+
+- name: Url Download
+  set_fact:
+    url_download: "{{ url_release }}{{ file_name }}"
+
+- name: Download Prob
+  win_get_url: 
+    url: "{{ url_download }}"
+    dest: '%TEMP%\{{ file_name }}'
+
+- name: Unzip Folder to Disk C
+  win_unzip: 
+    src: '%TEMP%\{{ file_name }}'
+    dest: C:\Program Files\
+    delete_archive: yes
+
+# - name: Folder ProB
+#   set_fact:
+#     folder: "{{ file_name | replace('.zip','') }}"
+
+- name: Create shortcut ProB
+  win_shortcut:
+    src: C:\Program Files\ProB\ProBWin.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\ProBWin.lnk
+    icon: C:\Program Files\ProB\tcl\icons\prob_icon-win32.ico,0
+
+# https://www3.hhu.de/stups/downloads/prob/tcltk/releases/1.11.1/ProB.windows64.zip
+
+# Install Dependecy
+- name: Copy ActiveTCL/TK to Documents
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/ActiveTcl-8.6.12.0000-MSWin32-x64-44f89538.msi
+    dest: C:\Users\Administrator\Documents\
+
+- name: Install ActiveTcl 
+  win_package:
+    path: C:\Users\Administrator\Documents\ActiveTcl-8.6.12.0000-MSWin32-x64-44f89538.msi
+    product_id: auto
+    state: present
+    arguments: /quiet /norestart #/update <Atualização1.msp>[;Atualização2.msp]
+
+- name: Remove MSI
+  win_file:
+    path: C:\Users\Administrator\Documents\ActiveTcl-8.6.12.0000-MSWin32-x64-44f89538.msi
+    state: absent

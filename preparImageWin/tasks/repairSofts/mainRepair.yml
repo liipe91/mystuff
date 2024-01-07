@@ -1,0 +1,14 @@
+- name: Repair Xammpp
+  include_tasks: repairXampp.yml
+
+- name: Repair Docker
+  include_tasks: repairDocker.yml
+
+- name: Repair Arduino IDE
+  include_tasks: repairArduino.yml
+
+- name: Repair RabbitMQ
+  include_tasks: repairRabbit.yml
+
+- name: Repair Processing
+  include_tasks: repairProcessing.yml

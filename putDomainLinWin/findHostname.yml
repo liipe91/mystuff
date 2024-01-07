@@ -1,0 +1,39 @@
+- name: Identificar nome do host pelo arquivo DHCP Fog
+  hosts: fog-labs
+  strategy: linear
+  become: yes
+
+  vars:
+    G1: extreme12
+    G2: extreme13
+    G3: extreme07
+    G4: extreme14
+    G5: extreme20
+    LabHw: extreme06
+    # LabHw: extreme05
+    LabPos: extreme18
+  
+  tasks:
+    - name: Identificar nome do host pelo arquivo DHCP Fog
+      shell: grep "{{ clientFog }}" /etc/dhcp/clonezilla.txt | grep -v "^#" | head -c +5
+      register: resname
+
+    - name: Setar nome na variável namepc
+      set_fact: namepc={{ resname.stdout }}
+
+    - name: Incluir setSwLab.yml
+      import_tasks: setSwLab.yml
+
+    - debug: var=swLab      
+    - debug: var=namepc
+
+    - name: Adicionar host no inventário deployLabLin
+      add_host: 
+        name: '{{ namepc }}'
+        groups: deployLabLin
+
+
+    - name: Adicionar host no inventário deployLabWin
+      add_host: 
+        name: '{{ namepc | upper }}'
+        groups: deployLabWin

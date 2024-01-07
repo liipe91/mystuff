@@ -1,0 +1,32 @@
+---
+# tasks file for preparImageWin
+
+# - name: Instalar Chocolatey
+#   import_tasks: choco/installChoco.yml
+#   tags: choco
+
+# - name: Install Softs Chocolatey
+#   import_tasks: choco/installSoft.yml
+#   tags: choco
+#   # tags: chocoN
+  
+# # Have a bug, i'll fix later. 
+# - name: Windows Update
+#   import_tasks: updateWin/installUpdateSO.yml
+#   ignore_errors: yes
+
+# - name: Install software without Chocolatey
+#   include_tasks: installSoftware/mainSofts.yml
+
+# - name: Add variable
+#   import_tasks: environmentVariable/addVariable.yml
+
+- name: Change Services and Features
+  import_tasks: Services-Features/main.yml
+
+# - name: Program in Desktop Public
+#   include_tasks: shortcutPublic/createShortcut.yml
+
+# - name: Repair programs
+#   include_tasks: repairSofts/mainRepair.yml
+#   tags: repair

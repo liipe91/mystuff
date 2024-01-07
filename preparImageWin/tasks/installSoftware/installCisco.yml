@@ -1,0 +1,55 @@
+# https://www.netacad.com/pt-br/courses/packet-tracer
+# https://skillsforall.com/resources/lab-downloads?userLang=pt-BR
+# MSI colocado em FILES ( baixado manualmente)
+
+# Colocar no files
+- name: Url copy installer
+  set_fact:
+    url_cisco: /etc/ansible/roles/preparImageWin/files/Cisco_Packet_Tracer_820_Windows_64bit_1048513af2.exe
+
+- name: Install Cisco Packet
+  win_copy:
+    src: "{{ url_cisco }}"
+    dest: C:\Users\Public\Desktop\Cisco.exe
+
+# - name: Basename installer
+#   set_fact:
+#     filename: "{{ url_cisco | urlsplit('path') | regex_search('Cisco(.*)exe') }}"
+
+# Silent Install
+- name: Instalar Softs .EXE
+  win_package:
+    path: C:\Users\Public\Desktop\Cisco.exe
+    product_id: auto
+    arguments: /VERYSILENT /NORESTART
+
+- name: Remove MSI
+  win_file:
+    path: C:\Users\Public\Desktop\Cisco.exe
+    state: absent
+
+
+# # Install With .AHK
+# - name: Basename installer
+#   set_fact:
+#     filename: "{{ url_cisco | urlsplit('path') | regex_search('Cisco(.*)exe') }}"
+
+# - name: Install Cisco Packet
+#   win_get_url:
+#     url: "{{ url_cisco }}"
+#     dest: C:\Users\Public\Desktop\ 
+
+# # - debug: msg="{{ url_cisco | urlsplit('path') | regex_search('Cisco(.*)exe') }}"
+
+# - name: Rename file
+#   win_shell: mv C:\Users\Public\Desktop\{{filename}} C:\Users\Public\Desktop\Cisco.exe
+
+# - name: Firewall rule to allow Cisco
+#   win_firewall_rule:
+#     name: Packet Tracer Executable
+#     action: allow
+#     direction: in
+#     program: C:\program files\cisco packet tracer 8.2.0\bin\packettracer.exe # Modificar versão
+#     # program: C:\BonitaStudioCommunity-2022.1-u0\BonitaStudioCommunity.exe
+#     state: present
+#     enabled: yes

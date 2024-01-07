@@ -1,0 +1,23 @@
+- name: Manter GRUB_DEFAULT "0" para sempre entrar no Linux
+  replace:
+    # dest: ./grub
+    path: /etc/default/grub
+    regexp: '{{ item.reg }}'
+    replace: '{{ item.rep }}'
+  loop: 
+    - { reg: '^#GRUB_DEFAULT="?0"?', rep: 'GRUB_DEFAULT="0"' }
+  # notify: update grub
+
+- name: NÃO Setar grub para manter a ultima opcao de boot selecionada
+  lineinfile:
+    # path: ./grub
+    path: /etc/default/grub
+    line: "{{ item.lin }}"
+    state: absent
+  loop: 
+    - { reg: '^GRUB_DEFAULT="?saved"?', ins: '^#GRUB_DEFAULT=', lin: 'GRUB_DEFAULT="saved"' }
+    - { reg: '^GRUB_SAVEDEFAULT="?true"?', ins: '^#GRUB_SAVEDEFAULT=', lin: 'GRUB_SAVEDEFAULT="true"' }
+  # notify: update grub
+
+# - name: Update Grub
+#   command: update-grub2

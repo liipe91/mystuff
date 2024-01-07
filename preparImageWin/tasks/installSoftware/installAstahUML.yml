@@ -1,0 +1,26 @@
+# - name: Get content
+#   win_uri: 
+#     url: https://astah.net/downloads/
+#     method: GET
+#     return_content: yes
+#   register: data
+
+# - debug: msg="{{ data.content | regex_search('https://cdn.change-vision.com/files/astah-uml(.*)setup.exe') }}"
+#   register: download_astah
+
+- name: Download Astah UML and Install
+  win_package:
+    path: https://members.change-vision.com/download/files/astah_UML/latest/jre64_installer
+    product_id: auto
+    arguments: /verysilent
+
+# - name: Adicionar atalho
+#   win_shortcut: 
+#     src: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Astah UML.lnk
+#     dest: C:\Users\Public\Desktop\Astah UML.lnk
+
+
+  # C:\Program Files\astah-UML
+  # https://members.change-vision.com/download/files/astah_UML/latest/jre64_installer
+  # https://cdn.change-vision.com/files/astah-uml(.*)setup.exe
+  # https://cdn.change-vision.com/files/astah-uml-8_5_0-39c620-jre-64bit-setup.exe

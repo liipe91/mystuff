@@ -1,0 +1,41 @@
+- name: DESFAZ ALTERACAO EXTREME
+  #G1 extreme12
+  #G2 extreme13
+  #G3 extreme07
+  #G4 extreme14
+  #SuporteTestes extreme21
+  hosts: '{{ swLab }}'
+  gather_facts: no
+  strategy: linear # Mitogen incompatível
+
+  #vars: 
+  #  portpc: 37
+  
+  tasks:
+    # - name: Setar MAC para Extreme
+    #   set_fact: macpc={{ hostvars[clientFog]['macpc'] }}
+          
+    # - name: Identificar porta do namepc em "{{ inventory_hostname }}"
+    #   exos_command:
+    #     commands: show fdb "{{ macpc }}"
+    #   register: result
+
+    # - set_fact: portpc={{ result.stdout[0].split()[15] }}
+    
+    - name: Desabilitar porta
+      exos_config:
+        lines: 
+        - disable ports {{ portpc }}
+      when: portpc | int
+
+      # Não aceita pause em strategy free    
+    # - name: Aguardar um tempo para Linux requisitar IP
+    #   pause: seconds=20
+
+    - name: Trocar Vlan
+      exos_config:
+        lines: 
+        - configure vlan NetI_Labs delete ports {{ portpc }}
+        - configure vlan NetE_Fog add ports {{ portpc }}
+        - enable ports {{ portpc }}
+      when: portpc | int

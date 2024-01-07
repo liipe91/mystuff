@@ -1,0 +1,27 @@
+- name: Baixar\ LTSpice
+  win_get_url:
+    url: https://ltspice.analog.com/software/LTspice64.exe
+    dest: C:\Users\Public\Desktop\ 
+
+- name: Copiar Script
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/installLTspice.exe
+    dest: C:\Users\Administrator\Documents\
+
+# AutoHotKey não consegue executar as janelas, precisa executar na mão
+# - name: Rodar Script instalação LTspice
+#   win_shell: C:\Users\Administrator\Documents\installLTspice.exe
+
+- name: Create Shortcut LTspice
+  win_shortcut:
+    src: C:\Program Files\LTC\LTspiceXVII\XVIIx64.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\LTspice XVII.lnk
+    icon: C:\Program Files\LTC\LTspiceXVII\XVIIx64.exe,0
+
+# - name: Remove installer
+#   win_file:
+#     path: "{{ item }}"
+#     state: absent
+#   loop:
+#     - C:\Users\Public\Desktop\LTspice64.exe
+#     - C:\Users\Administrator\Documents\installLTspice.exe

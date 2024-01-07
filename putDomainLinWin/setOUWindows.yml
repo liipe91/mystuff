@@ -1,0 +1,34 @@
+- name: Setar OU G1
+  set_fact: 
+    ou_path_windows: "OU=Grad1,OU=local,OU=com"
+  when: deployLabWin is search("G1")
+
+- name: Setar OU G2
+  set_fact: 
+    ou_path_windows: "OU=Grad2,OU=local,OU=com"
+  when: deployLabWin is search("G2")
+
+- name: Setar OU G3
+  set_fact: 
+    ou_path_windows: "OU=Grad3,OU=local,OU=com"
+  when: deployLabWin is search("G3")
+
+- name: Setar OU G4
+  set_fact: 
+    ou_path_windows: "OU=Grad4,OU=local,OU=com"
+  when: deployLabWin is search("G4")
+
+- name: Setar OU G5
+  set_fact: 
+    ou_path_windows: "OU=Grad5,OU=local,OU=com"
+  when: deployLabWin is search("G5")
+
+- name: Setar OU Pesquisa
+  set_fact: 
+    ou_path_windows: "OU=P1,OU=local,OU=com"
+  when: deployLabWin is search("P1")
+
+- name: Setar OU Hardware
+  set_fact: 
+    ou_path_windows: "OU=Hardware,OU=local,OU=com"
+  when: deployLabWin is search("HW")

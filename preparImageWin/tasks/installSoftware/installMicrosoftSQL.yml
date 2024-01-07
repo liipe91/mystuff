@@ -1,0 +1,31 @@
+- name: Instalar Microsoft SQL Server Management Studio
+  win_package:
+    path: https://aka.ms/ssmsfullsetup
+    product_id: auto
+    arguments: /quiet /norestart
+    expected_return_code: [0, 1603]
+  register: log
+  failed_when: log.stderr is defined
+
+# - debug: msg="{{ log.msg | regex_search("'(.*)'") | regex_replace("\'","")}}"
+#   register: path
+
+# - name: Remover arquivo
+#   win_file:
+#     path: "{{path.msg}}"
+#     state: absent
+#   when: log.msg is search("Unhandled exception while executing module")
+
+# - name: Buscar Pasta
+#   win_shell: get-item "{{program_filesx86}}*" | select-String "sql server management"
+#   register: folder
+
+# - name: Nome diretorio Microsoft SQL Management
+#   debug: msg="{{ folder.stdout_lines[1] | replace('C:\Program Files (x86)\M','M')}}"
+#   register: name_directory
+
+# - name: Shortcut Microsoft SQL Management
+#   win_shortcut:
+#     src: C:\Program Files (x86)\{{name_directory.msg}}\Common7\IDE\Ssms.exe
+#     dest: C:\Users\Public\Desktop\{{name_directory.msg}}.lnk
+#     icon: C:\Program Files (x86)\{{name_directory.msg}}\Common7\IDE\Ssms.exe,0

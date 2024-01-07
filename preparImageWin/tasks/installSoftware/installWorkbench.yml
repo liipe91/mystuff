@@ -1,0 +1,8 @@
+- name: Copiar o arquivo MSI para o host Windows
+  win_copy:
+    src: /etc/ansible/files/mysql-workbench-community-8.0.33-winx64.msi
+    dest: C:\Users\Administrator\AppData\Local\Temp\mysql-workbench.msi  # Escolha um local adequado no host Windows
+
+- name: Instalar o MySQL Workbench em modo silencioso
+  win_shell: |
+    Start-Process msiexec.exe -Wait -ArgumentList "/i C:\Users\Administrator\AppData\Local\Temp\mysql-workbench.msi /quiet"

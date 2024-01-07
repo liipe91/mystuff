@@ -1,0 +1,21 @@
+- name: Get content
+  win_uri: 
+    url: https://orangedatamining.com/download/#windows
+    method: GET
+    return_content: yes
+  register: data
+
+- debug: msg="{{ data.content | regex_search('https://download\.biolab\.si/download/files/Orange3([+-]?(?=\.\d|\d)(?:\d+)?(?:\.?\d*))(?:[Ee]([+-]?\d+))?[0-9]*\.[0-9]+-Miniconda-x86_64\.exe')}}"
+  register: url_orange
+
+- name: Instalar Orange3
+  win_package:
+    path: "{{ url_orange.msg }}"
+    product_id: auto
+    arguments: /S /AllUsers
+    expected_return_code: [0, 2]
+
+
+  
+
+

@@ -1,0 +1,71 @@
+- name: Get content
+  win_uri: 
+    url: https://www.atelierb.eu/en/atelier-b-support-maintenance/download-atelier-b/
+    method: GET
+    return_content: yes
+  register: data
+
+- debug: msg="{{ data.content | regex_findall('Atelier B ([0-9]+(\.[0-9]+)+)') | max }}"
+  register: version
+
+- debug: msg="{{ version.msg | regex_search('([0-9]+(\.[0-9]+)+)') }}"
+  register: latest_version
+
+# - debug: msg="{{ data.content | regex_search('(.*)uploads(.*){{latest_version.msg}}-win32.exe')}}"
+#   register: cont
+
+# A primeira url fornecida pelo site, é para o download da mais recente
+- debug: msg="{{ data.content | regex_search('https:(.*)uploads(.*).exe') }}"
+  register: url_download
+
+- name: Download Atelier B
+  win_get_url:
+    url: "{{ url_download.msg }}"
+    dest: C:\Users\Public\Desktop\ 
+
+# # https://www.atelierb.eu/wp-content/uploads/2021/12/atelierb-free-4.7.1-win32.exe
+
+- name: Name installer Atelier B
+  set_fact:
+    filename: "{{ url_download.msg | regex_search('atelierb-free(.*)')}}"
+
+- name: Copiar Script para os documentos
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/installAtelierB.exe
+    dest: C:\Users\Administrator\Documents\
+
+- name: Rename file
+  win_shell: mv C:\Users\Public\Desktop\{{filename}} C:\Users\Public\Desktop\atelierB.exe
+
+- name: Rodar Script instalação 
+  win_shell: C:\Users\Administrator\Documents\installAtelierB.exe
+
+# - name: Path folder Disk C Atelier B project 
+#   set_fact:
+#     path: C:\AB_{{latest_version.msg}}
+
+# - name: Create directory structure
+#   win_file:
+#     path: "{{path}}"
+#     state: directory
+
+- name: Permission Atelier B folder
+  win_acl:
+    user: Everyone
+    path: C:\Users\Administrator\AtelierB_Data\AtelierB_free_{{latest_version.msg}}\press\bdb
+    type: allow
+    rights: ExecuteFile,Read,Write
+
+# - name: Criar Shortcut Atelier B
+#   win_shortcut:
+#     src: C:\Program Files (x86)\Atelier B free {{ latest_version.msg }}\bbin\win32\AtelierB.exe
+#     dest: C:\Users\Public\Desktop\AtelierB {{latest_version.msg}}.lnk
+#     icon: C:\Program Files (x86)\Atelier B free {{ latest_version.msg }}\bbin\win32\AtelierB.exe,0
+
+- name: Remove installer
+  win_file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - C:\Users\Public\Desktop\atelierB.exe
+    - C:\Users\Administrator\Documents\installAtelierB.exe

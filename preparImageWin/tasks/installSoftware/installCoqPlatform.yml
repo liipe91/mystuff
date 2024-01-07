@@ -1,0 +1,80 @@
+- name: Get content
+  win_uri: 
+    url: "{{ base_url_coq }}/latest"
+    method: GET
+    return_content: yes
+  register: data
+
+# Verificar todas as versões do Coq Platform e filtrar a max (mais recente)
+- debug: msg="{{ data.content | regex_findall('Coq ([0-9]+(\.[0-9]+)+)') | max }}"
+  register: version
+
+# Filtrar a versão no formato ([0-9].[0-9])
+- debug: msg="{{ version.msg | regex_search('[0-9]*\.[0-9]+') }}"
+  register: latest_version
+
+# Buscar informações para construir a URL de download
+- debug: msg="{{ data.content | regex_findall('Coq-Platform-release-(.*)-Windows-x86_64.exe') }}"
+  register: file_name
+
+# Separar o ano da versão
+- debug: msg="{{ file_name.msg[0] | regex_search('(.*)-version') | replace('-version','') }}"
+  register: year
+
+# Filtrar o ano sem o ultimo digito 
+- debug: msg="{{ file_name.msg[0] | regex_replace('(.*)version[0-9]*\.[0-9]+[0-9]*\.[0-9]+\.','') }}"
+  register: year_last
+
+# Download Coq Platform e colocar na area de trabalho
+- name: Download Coq Platform
+  win_get_url: 
+    url: "{{ base_url_coq }}download/{{ year.msg }}/Coq-Platform-release-{{ file_name.msg[0] }}-Windows-x86_64.exe"
+    dest: C:\Users\Public\Desktop\Coq-Platform.exe
+
+# - name: Name installer Coq Platform
+#   set_fact:
+#     filename: "Coq-Platform-release-{{ year.msg }}-version_{{ latest_version.msg }}_{{ year_last.msg }}-arch-x86_64_signed.exe"
+
+# # Renomear installer para o script localizar na area de trabalho
+# - name: Rename file
+#   win_shell: mv C:\Users\Public\Desktop\{{filename}} C:\Users\Public\Desktop\Coq-Platform.exe
+
+- name: Copiar Script para os documentos
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/installCoqPlatform.exe
+    dest: C:\Users\Administrator\Documents\
+
+- name: Rodar Script instalação 
+  win_shell: C:\Users\Administrator\Documents\installCoqPlatform.exe
+
+- name: Copy .Ico to Folder
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/tasks/shortcutPublic/coq.ico
+    dest: C:\Coq-Platform~{{ latest_version.msg }}~{{ year_last.msg }}\share\icons\
+
+- name: Create Shortcut Coq
+  win_shortcut:
+    src: C:\Coq-Platform~{{ latest_version.msg }}~{{ year_last.msg }}\bin\coqide.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Coq IDE.lnk
+    icon: C:\Coq-Platform~{{ latest_version.msg }}~{{ year_last.msg }}\share\icons\coq.ico,0
+
+- name: Set variable Coq
+  win_path:
+    elements: C:\Coq-Platform~{{ latest_version.msg }}~{{ year_last.msg }}\bin
+
+- name: Remove installer
+  win_file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - C:\Users\Public\Desktop\Coq-Platform.exe
+    - C:\Users\Administrator\Documents\installCoqPlatform.exe
+
+# Test #
+# - debug: msg="{{ year.msg | regex_replace('\\d$','') }}"
+#   register: year_last
+  
+# - debug: msg="{{ base_url_coq }}download/{{ year.msg }}/Coq-Platform-release-{{ year.msg }}-version_{{ latest_version.msg }}_{{ year_last.msg }}-arch-x86_64_signed.exe"
+
+# Coq-Platform-release-2022.04.1-version_8.15_2022.04-arch-x86_64_signed.exe
+# https://github.com/coq/platform/releases/download/2022.04.1/Coq-Platform-release-2022.04.1-version_8.15_2022.04-arch-x86_64_signed.exe

@@ -1,0 +1,42 @@
+- name: Get content
+  win_uri: 
+    url: https://npcap.com/#download
+    method: GET
+    return_content: yes
+  register: data
+
+- name: Version Npcap
+  set_fact:
+    file_version: "{{ data.content | regex_search('npcap-[0-9]*\\.[0-9]+\\.exe') }}"
+
+- name: Download exe Npcap
+  win_get_url:
+    url: "https://npcap.com/dist/{{ file_version }}"
+    dest: C:\Users\Administrator\Documents\
+
+- name: Rename file
+  win_shell: mv C:\Users\Administrator\Documents\{{file_version}} C:\Users\Administrator\Documents\npcap.exe
+
+- name: Copy Script to Documents
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/installNpcap.exe
+    dest: C:\Users\Administrator\Documents\
+
+- name: Rodar Script instalação 
+  win_shell: C:\Users\Administrator\Documents\installNpcap.exe
+
+- name: Remove Installer
+  win_file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - C:\Users\Administrator\Documents\npcap.exe
+    - C:\Users\Administrator\Documents\installNpcap.exe
+
+
+
+# # https://nmap.org/download
+
+# # https://nmap.org/dist/nmap-7.93-setup.exe
+
+# https://npcap.com/dist/npcap-1.71.exe

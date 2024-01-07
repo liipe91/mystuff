@@ -1,0 +1,50 @@
+- name: Get content
+  win_uri: 
+    url: '{{ base_url_bonita }}'
+    method: GET
+    return_content: yes
+  register: data
+
+- name: File name
+  set_fact:
+    filename_bonita: "{{ data.content | regex_search('Bonita(.*)x86_64.exe') }}"
+
+- name: Version bonita
+  set_fact:
+    version_bonita: "{{ filename_bonita | regex_search('[0-9]*\\.[0-9]+-[a-zA-Z]+[0-9]+') }}"
+
+- name: Url Bonita download
+  set_fact:
+    url_bonita: "{{ base_url_bonita | regex_replace ('latest','download') }}/{{ version_bonita }}/{{ filename_bonita }}"
+
+# https://github.com/bonitasoft/bonita-platform-releases/releases/download/2022.1-u0/BonitaStudioCommunity-2022.1-u0-x86_64.exe
+
+# netsh advfirewall firewall delete rule name=”your rule name” dir=ina
+# netsh advfirewall firewall add rule name="BonitaStudioCommunity.exe" dir=in action=allow program="C:\BonitaStudioCommunity-2022.1-u0\BonitaStudioCommunity.exe"
+
+- name: Instalar Softs .EXE
+  win_package:
+    path: "{{ url_bonita }}"
+    product_id: auto
+    arguments: --mode unattended
+    expected_return_code: [0,1] # 1 - Falha pós instalação, por causa do firewall
+
+- name: Firewall rule to allow BonitaSoft
+  win_firewall_rule:
+    name: BonitaStudioCommunity.exe
+    action: allow
+    direction: in
+    program: C:\{{ filename_bonita }}-{{ version_bonita }}\BonitaStudioCommunity.exe
+    # program: C:\BonitaStudioCommunity-2022.1-u0\BonitaStudioCommunity.exe
+    state: present
+    enabled: yes
+
+# - name: Criar shortcut BonitaSoft
+#   win_shortcut:
+#     src: C:\{{ file_name_bonita.msg | regex_replace('-x86_64.exe','')}}\BonitaStudioCommunity.exe
+#     dest: C:\Users\Public\Desktop\BonitaStudioCommunity Software.lnk
+#     icon: C:\{{ file_name_bonita.msg | regex_replace('-x86_64.exe','')}}\BonitaStudioCommunity.exe
+
+
+
+

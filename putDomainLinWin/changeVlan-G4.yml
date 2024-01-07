@@ -1,0 +1,62 @@
+- name: Identificar porta no Extreme e Substituir Vlan
+  #G1 extreme12
+  #G2 extreme13
+  #G3 extreme07
+  #G4 extreme14
+  #LabPos extreme18
+  #SuporteTestes extreme21
+  hosts: "{{ swLab }}"
+  gather_facts: no
+  strategy: linear # Mitogen incompatível
+
+  vars:
+    vlanFog: NetE_Fog
+    vlanLab: NetI_Labs
+  
+  tasks:
+    - name: Setar MAC para Extreme
+      set_fact: macpc="D0:94:66:DD:F0:1B"
+    
+    # - name: Setar nome para Extreme
+    #   set_fact: namepc={{ hostvars['fog-labs']['namepc'] }}
+          
+    - name: Identificar porta do namepc em "{{ inventory_hostname }}"
+      exos_command:
+        commands: show fdb "{{ macpc }}"
+      register: result
+
+    - set_fact: portpc={{ result.stdout[0].split()[15] }}
+
+    # - debug: msg="{{ namepc }} - Porta {{ portpc }}"    
+
+    - set_fact: vlanLab="NetI_LabHw"
+      when: swLab is search("extreme05") or swLab is search("extreme06")
+
+    - name: Remover Vlan '{{ vlanFog }}'
+      exos_config:
+        lines: 
+        - disable ports {{ portpc }}
+        - configure vlan {{ vlanFog }} delete ports {{ portpc }}
+        # - configure vlan NetI_Labs add ports {{ portpc }}
+        - configure vlan {{ vlanLab }} add ports {{ portpc }}
+        - enable ports {{ portpc }}
+      when: 
+        - portpc | int
+        # - portpc != '48'
+
+    - name: Adicionar Vlan '{{ vlanLab }}'
+      exos_config:
+        lines:     
+        - configure vlan {{ vlanLab }} add ports {{ portpc }}
+        - enable ports {{ portpc }}
+      when: 
+        - portpc | int
+        # - portpc != '48'
+
+    - name: Salvar config Switch
+      exos_config:
+        save_when: modified
+
+      # Não aceita pause em strategy free    
+    # - name: Aguardar um tempo para Linux requisitar IP
+    #   pause: seconds=20

@@ -1,0 +1,30 @@
+- name: Copiar instalador
+  win_copy:
+    src: /etc/ansible/roles/preparImageWin/files/ModelSimSetup-20.1.1.720-windows.exe
+    dest: C:\Users\Public\Desktop\
+
+- name: Instalar Softs .EXE
+  win_package:
+    path: C:\Users\Public\Desktop\ModelSimSetup-20.1.1.720-windows.exe
+    product_id: auto
+    arguments: --installdir C:\InstallModelSim\ --unattendedmodeui minimal --mode unattended --accept_eula 1
+    # expected_return_code: [0, 2]
+
+- name: Remover instalador
+  win_file:
+    path: C:\Users\Public\Desktop\ModelSimSetup-20.1.0.711-windows.exe
+    state: absent
+
+- name: Adicionar atalho
+  win_shortcut:
+    src: C:\InstallModelSim\modelsim_ase\win32aloem\modelsim.exe
+    dest: C:\ProgramData\Microsoft\Windows\Start Menu\Programs\ModelSim - Intel FPGA 20.1.lnk
+    icon: C:\InstallModelSim\modelsim_ase\win32aloem\modelsim.exe,0
+
+# path_folder_src: /etc/ansible/files/Hardware/
+
+# modelsim_installer: ModelSimSetup-20.1.0.711-windows.exe
+
+# path_installer_model: C:\InstallModelSim\
+
+

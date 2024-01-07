@@ -1,0 +1,46 @@
+- name: Get content latest
+  uri:
+    url: '{{ base_url_docker_compose }}'
+    method: GET
+    return_content: yes
+  register: latest
+
+- set_fact:
+    version: "{{latest.url | regex_search('v(.*)')}}"
+
+- name: full download url docker
+  set_fact:
+    full_url_docker: "https://github.com/docker/compose/releases/download/{{version}}/docker-compose-linux-x86_64"
+  
+-  get_url: 
+    url: '{{ full_url_docker }}' 
+    dest: /usr/local/bin/docker-compose
+    mode: 'u+x,g+x,o+x'
+
+- name: ajust dockerrootles
+  file:
+    path: "{{item}}"
+    owner: "root"
+    group: "root"
+    mode: '0666'
+  loop: 
+    - /etc/subuid
+    - /etc/subgid
+
+- name: Add usuário tempest no subuid e subgid
+  lineinfile:
+    path: '{{ item}}'
+    state: present
+    line: "tempest:1000000000:65536"
+  loop:
+    - /etc/subuid
+    - /etc/subgid
+
+- name: Add usuário curso no subuid e subgid
+  lineinfile:
+    path: '{{ item}}'
+    state: present
+    line: "curso:1000000000:65536"
+  loop:
+    - /etc/subuid
+    - /etc/subgid    

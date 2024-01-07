@@ -1,0 +1,16 @@
+---
+- import_tasks: disableUnattendedUpgrades.yml
+
+- import_tasks: setGrub.yml
+
+- import_tasks: setGrubPass.yml 
+
+- import_tasks: ajustHomeSnap.yml
+
+- import_tasks: setTimeoutStop.yml
+
+- import_tasks: setSsh.yml
+
+- import_tasks: installApps.yml
+
+- import_tasks: setLoginScreen.yml

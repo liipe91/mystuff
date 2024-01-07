@@ -1,0 +1,25 @@
+# Ajustar versão com regex
+
+- name: Download CompSim
+  get_url: 
+    url: 'http://compsim.crato.ifce.edu.br/releases/CompSim_v0.8.9a-Lin64.zip'
+    dest: /tmp
+
+- name: Unarchive CompSim on /opt
+  unarchive: 
+    remote_src: yes
+    src: /tmp/CompSim_v0.8.9a-Lin64.zip
+    dest: /opt/   
+
+- name: copy icon image from local to remote source
+  copy:
+    src: /etc/ansible/roles/preparImageLin/files/index.jpeg
+    dest: /opt/CompSim_v0.8.9a-Lin64
+
+- name: Create CompSim desktop entry
+  template:
+    src: /etc/ansible/roles/preparImageLin/templates/compsim.j2
+    dest: /usr/share/applications/compsim.desktop
+    owner: root
+    group: root
+    mode: 0644

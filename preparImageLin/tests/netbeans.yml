@@ -1,0 +1,60 @@
+- name: Testando playbook 
+  hosts: g3c45
+  gather_facts: yes
+
+  tasks:
+  # - name: get latest version Netbeans IDE
+  #   shell: snap info netbeans | grep latest/stable | awk '{ print $2 }'
+  #   register: app_latest_version
+
+  # - name: download latest version
+  #   get_url:
+  #     url: 'https://dlcdn.apache.org/netbeans/netbeans/{{app_latest_version.stdout}}/netbeans-{{app_latest_version.stdout}}-bin.zip'
+  #     dest: /tmp
+  #     force_basic_auth: yes
+      
+  # #  - debug: 
+  # #     var: app_latest_version.stdout
+
+  # # - meta: end_host
+
+  # - name: Unarchive Netbeans IDE on /opt
+  #   unarchive: 
+  #     remote_src: yes
+  #     src: /tmp/netbeans-{{app_latest_version.stdout}}-bin.zip
+  #     dest: /opt/   
+
+  # - name: Create Netbeans IDE desktop entry
+  #   template:
+  #     src: /etc/ansible/roles/preparImageLin/templates/netbeans.j2
+  #     dest: /usr/share/applications/netbeans.desktop
+  #     owner: root
+  #     group: root
+  #     mode: 0644
+
+  - name: get latest version Netbeans IDE
+    shell: snap info netbeans | grep latest/stable | awk '{ print $2 }'
+    register: app_latest_version
+
+  - name: download latest version
+    get_url:
+      url: 'https://dlcdn.apache.org/netbeans/netbeans/{{app_latest_version.stdout}}/netbeans-{{app_latest_version.stdout}}-bin.zip'
+      dest: /tmp
+      force_basic_auth: yes
+      timeout: 30
+      
+  - meta: end_host
+
+  - name: Unarchive Netbeans IDE on /opt
+    unarchive: 
+      remote_src: yes
+      src: /tmp/netbeans-{{app_latest_version.stdout}}-bin.zip
+      dest: /opt/   
+
+  - name: Create Netbeans IDE desktop entry
+    template:
+      src: /etc/ansible/roles/preparImageLin/templates/netbeans.j2
+      dest: /usr/share/applications/netbeans.desktop
+      owner: root
+      group: root
+      mode: 0644

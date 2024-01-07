@@ -1,0 +1,16 @@
+# Ajustar versão com regex
+- name: Download NoMachine
+  get_url: 
+    url: 'https://download.nomachine.com/download/7.10/Linux/nomachine_7.10.1_1_amd64.deb'
+    dest: /tmp
+
+- name: Install NoMachine
+  apt:
+    deb: '/tmp/nomachine_7.10.1_1_amd64.deb'
+    state: present
+
+- name: Making sure NXServer is started.
+  service:
+    name: nxserver
+    state: started
+    enabled: yes

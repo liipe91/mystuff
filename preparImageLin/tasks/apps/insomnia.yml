@@ -1,0 +1,11 @@
+- name: Add Insomnia repository
+  apt_repository:
+    repo: "deb [arch=amd64 trusted=yes] https://download.konghq.com/insomnia-ubuntu default all"
+    filename: insomnia
+    update_cache: yes
+    state: present
+
+- name: Instalar Insomnia
+  apt:
+    name: insomnia
+    state: present

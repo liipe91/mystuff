@@ -1,0 +1,84 @@
+- name: Instalar pacotes APT
+  import_tasks: apps/softsApt.yml
+  ignore_errors: yes
+
+- name: Instalar VS Code
+  import_tasks: apps/vscode.yml
+  ignore_errors: yes
+
+- name: Instalar Eclipse IDE
+  import_tasks: apps/eclipse.yml
+  ignore_errors: yes
+
+- name: Instalar Processing IDE
+  import_tasks: apps/processing.yml
+  ignore_errors: yes
+
+- name: Instalar Wireshark
+  import_tasks: apps/wireshark.yml
+  ignore_errors: yes
+
+- name: Instalar Minikube
+  import_tasks: apps/minikube.yml
+  ignore_errors: yes
+
+- name: Instalar Jetbrains Stack 
+  include_tasks: apps/jetbrainsapps.yml    
+  loop: "{{ jetbrains_softs }}"
+  ignore_errors: yes
+
+- name: Instalar Xampp
+  import_tasks: apps/xampp.yml
+  ignore_errors: yes
+
+- name: Instalar Netbeans
+  import_tasks: apps/netbeans.yml
+  ignore_errors: yes
+
+- name: Instalar PortSwigger
+  import_tasks: apps/portswigger.yml
+  ignore_errors: yes
+
+- name: Instalar Atelier B
+  import_tasks: apps/atelierb.yml
+  ignore_errors: yes
+
+- name: Instalar CompSim
+  import_tasks: apps/compsim.yml
+  ignore_errors: yes
+
+- name: Instalar R-Studio
+  import_tasks: apps/r-studio.yml
+  ignore_errors: yes
+
+- name: Instalar Google Chrome
+  import_tasks: apps/googlechrome.yml
+  ignore_errors: yes
+
+- name: Instalar NoMachine
+  import_tasks: apps/nomachine.yml
+  ignore_errors: yes
+
+- name: Instalar Docker
+  import_tasks: apps/docker.yml
+  ignore_errors: yes
+
+- name: Instalar Grub Customizer
+  import_tasks: apps/grubcustomizer.yml
+  ignore_errors: yes
+
+
+
+
+# - name: Instalar Insomnia
+#   import_tasks: apps/insomnia.yml
+#   ignore_errors: yes
+
+# - name: Instalar Atom
+#   import_tasks: apps/atom.yml
+#   ignore_errors: yes
+
+# - name: Instalar Sublime Text
+#   import_tasks: apps/sublimetext.yml
+#   ignore_errors: yes
+

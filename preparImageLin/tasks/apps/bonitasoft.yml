@@ -1,0 +1,69 @@
+---
+- name: Get content
+  uri: 
+    url: '{{ base_url_bonita }}'
+    method: GET
+    return_content: yes
+  register: data
+
+# - set_fact:
+#     file_name_bonita: "{{ data.content | regex_search('\/Bonita(.*)x86_64\.exe') }}"
+
+- debug: msg="{{ data.content | regex_search('\/Bonita(.*)x86_64\.run') | regex_replace('/','\') }}"
+  register: file_name_bonita
+
+# - set_fact:
+#     latest_version_bonita: "{{ data.content | regex_search('\/Bonita(.*)x86_64\.exe') | regex_search('\-(.*)\-x', '\\1') }}"
+
+- debug: msg="{{ data.content | regex_search('\/Bonita(.*)x86_64\.run') | regex_search('\-(.*)\-x', '\\1')}}"
+  register: latest_version_bonita
+
+# - set_fact:
+#     url_bonita: "{{ base_url_bonita | regex_replace ('latest','download') }}/{{ latest_version_bonita[0] }}{{ file_name_bonita }}"
+
+- debug: msg="{{ base_url_bonita | regex_replace('latest','download') }}/{{ latest_version_bonita.msg[0] }}/{{ file_name_bonita.msg }}"
+  register: full_url_latest_bonita
+
+- debug: msg="{{ full_url_latest_bonita.msg }}"
+
+#- debug: msg={{ full_url_latest | regex_search('processing-4(.*)z')}}
+- debug: msg={{ full_url_latest_bonita.msg | basename}}
+  register: file_name
+
+- name: baixando processing IDE
+  get_url:
+    # Ideia: para não precisarmos sempre pegar o link da última versão, podemos pensar numa forma de automatizar isso também
+    # Ex.: Com o resultado do comando curl -L https://github.com/processing/processing4/releases/latest | grep -E "linux-x64.tgz"
+   
+    url: '{{ full_url_latest_bonita.msg }}'
+    dest: /tmp/{{ file_name.msg }}
+    mode: '744'
+
+- name: Instalar BonitaSoft.run
+  shell: /tmp/{{ file_name.msg }} --unattendedmodeui minimal --mode unattended
+
+
+# - name: extraindo processingIDE
+#   unarchive:
+#     remote_src: yes
+#     src: /tmp/{{ file_name.msg }}
+#     dest: /opt/
+#     list_files: yes
+#   register: processing_dir_extracted
+
+# - name: criando atalho no menu
+#   copy:
+#     dest: /usr/share/applications/processing.desktop
+#     content: | 
+#       [Desktop Entry]
+#       Type=Application
+#       Name=Processing
+#       GenericName=Processing
+#       Comment=Open-source software prototyping platform
+#       Exec=/opt/{{ processing_dir_extracted.files[0] }}processing
+#       Icon=/opt/{{ processing_dir_extracted.files[0] }}lib/icons/pde-128.png
+#       Terminal=false
+#       Categories=Development;IDE;Programming;
+#       MimeType=text/x-processing;
+#       Keywords=sketching;software;animation;programming;coding;
+#       StartupWMClass=processing-app-ui-Splash

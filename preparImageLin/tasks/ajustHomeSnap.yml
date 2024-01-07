@@ -1,0 +1,15 @@
+- name: adding new path
+  replace:
+    path: /etc/apparmor.d/tunables/home.d/ubuntu
+    regexp: '^\#\@\{HOMEDIRS\}\+\=$'
+    replace: '@{HOMEDIRS}+=/home/CIN/'
+
+- name: restarting services
+  systemd:
+    name: '{{ item }}'
+    state: restarted
+  loop:
+    - apparmor.service
+    - snapd.apparmor.service
+    - snapd.service
+    - snapd.socket

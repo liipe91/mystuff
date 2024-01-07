@@ -1,0 +1,182 @@
+- name: Install Docker Rootless on Ubuntu 22.04
+  hosts: g3c46
+  become: yes
+
+  tasks:
+    - name: Install dependencies
+      apt:
+        name: 
+          - uidmap
+          - dbus-user-session
+        state: present
+
+    - name: Creating script
+      template:
+        src: /etc/ansible/roles/preparImageLin/templates/docker.j2
+        dest: /etc/profile.d/install_docker_rootless.sh
+        mode: '0755'
+
+
+    # - name: Install dependencies packages 
+    #   apt:
+    #     name:
+    #       - dbus-user-session
+    #       - uidmap
+    #       - fuse-overlayfs
+    #     state: present
+    #     install_recommends: false
+
+    # - name: 
+  
+
+    # - name: Get content latest
+    #   uri:
+    #     url: '{{ base_url_docker_compose }}'
+    #     method: GET
+    #     return_content: yes
+    #   register: latest
+
+    # - set_fact:
+    #     version: "{{latest.url | regex_search('v(.*)')}}"
+
+    # - name: full download url docker
+    #   set_fact:
+    #     full_url_docker: "https://github.com/docker/compose/releases/download/{{version}}/docker-compose-linux-x86_64"
+      
+    # -  get_url: 
+    #     url: '{{ full_url_docker }}' 
+    #     dest: /usr/local/bin/docker-compose
+    #     mode: 'u+x,g+x,o+x'
+
+    # - name: ajust dockerrootles
+    #   file:
+    #     path: "{{item}}"
+    #     owner: "root"
+    #     group: "root"
+    #     mode: '0666'
+    #   loop: 
+    #     - /etc/subuid
+    #     - /etc/subgid
+    # - name: Required packages
+    #   apt:  
+    #     name: '{{item}}'
+    #     state: present
+    #   loop: 
+    #     - docker.io
+    #     - docker-compose  
+    #     - uidmap
+
+    # - name: Download the Rootless Docker installer
+    #   get_url:
+    #     url: https://get.docker.com/rootless
+    #     dest: ~/dockerRootless.sh
+    #     mode: 0777
+  
+    # - name: Install Rootless Docker
+    #   shell: ~/dockerRootless.sh
+    #   become_user: docker
+    #   args:
+    #     executable: /usr/bin/bash
+
+    # - name: Create a directory if it doecd s not exist
+    #   file:
+    #     path: ~/.docker/cli-plugins/
+    #     state: directory
+    #     mode: "0700"
+
+    # - name: Get content latest
+    #   uri:
+    #     url: '{{ base_url_docker }}'
+    #     method: GET
+    #     return_content: yes
+    #   register: latest
+
+    # - set_fact:
+    #     version: "{{latest.url | regex_search('v(.*)')}}"
+
+    # - name: full download url docker
+    #   set_fact:
+    #     full_url_docker: "https://github.com/docker/compose/releases/download/{{version}}/docker-compose-linux-x86_64"
+
+    # - name: Download Docker compose
+    #   get_url:
+    #     url: '{{full_url_docker}}'
+    #     dest: ~/.docker/cli-plugins/docker-compose
+    #     mode: 0700
+        # This is totally optional
+      # environment:
+      #  http_proxy: "http://<my_proxy_url>:9000/"
+      #  https_proxy: "http://<my_proxy_url>:9000/"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#   vars:
+#     base_url_docker: https://github.com/docker/compose/releases/latest
+# #
+
+#   tasks: 
+
+#   - name: Get content latest
+#     uri:
+#       url: '{{ base_url_docker }}'
+#       method: GET
+#       return_content: yes
+#     register: latest
+
+#   - set_fact:
+#       version: "{{latest.url | regex_search('v(.*)')}}"
+
+#   - name: full download url docker
+#     set_fact:
+#       full_url_docker: "https://github.com/docker/compose/releases/download/{{version}}/docker-compose-linux-x86_64"
+    
+#   -  get_url: 
+#       url: '{{ full_url_docker }}' 
+#       dest: /usr/local/bin/docker-compose
+#       mode: 'u+x,g+x,o+x'
+
+#   - name: ajust dockerrootles
+#     file:
+#       path: "{{item}}"
+#       owner: "root"
+#       group: "root"
+#       mode: '0666'
+#     loop: 
+#       - /etc/subuid
+#       - /etc/subgid
+
+#   - name: Add usuário tempest no subuid e subgid
+#     lineinfile:
+#       path: '{{ item}}'
+#       state: present
+#       line: "tempest:1000000000:65536"
+#     loop:
+#       - /etc/subuid
+#       - /etc/subgid
+
+#   - name: Add usuário curso no subuid e subgid
+#     lineinfile:
+#       path: '{{ item}}'
+#       state: present
+#       line: "curso:1000000000:65536"
+#     loop:
+#       - /etc/subuid
+#       - /etc/subgid    

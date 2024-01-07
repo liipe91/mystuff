@@ -1,0 +1,37 @@
+# - name: Upgrade all packages to the latest version
+#   apt:
+#     name: "*"
+#     state: latest
+
+ # Testar se resolve o erro de quando o Apt já está em execução
+  # https://code-maven.com/ansible-disable-apt-get
+  # https://stackoverflow.com/questions/45269225/ansible-playbook-fails-to-lock-apt/51919678#51919678
+  # https://github.com/ansible/ansible/issues/51663
+- name: Stop services Apt
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - apt-daily
+    - apt-daily.timer
+    - apt-daily-upgrade
+    - apt-daily-upgrade.timer
+
+# - name: Wait for any possibly running unattended upgrade to finish
+#   raw: systemd-run --property="After=apt-daily.service apt-daily-upgrade.service" --wait /bin/true
+
+- name: Disable services
+  service:
+    name: "{{ item }}"
+    enabled: no
+  with_items:
+    - apt-daily
+    - apt-daily.timer
+    - apt-daily-upgrade
+    - apt-daily-upgrade.timer
+
+- name: Remove unattended-upgrades
+  apt:
+    name: unattended-upgrades
+    state: absent
+

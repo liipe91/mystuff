@@ -1,0 +1,60 @@
+- name: Verificar se GDM3 esta instalado
+  lineinfile:
+    name: /etc/X11/default-display-manager
+    line: "/usr/sbin/gdm3"
+    state: present
+  check_mode: yes
+  register: display_conf
+  failed_when: (display_conf is changed) or (display_conf is failed)
+
+- name: Disable user list on login screen
+  lineinfile:
+    path: /etc/gdm3/greeter.dconf-defaults
+    state: present
+    regexp: "^\\# disable-user-list=true$"
+    insertafter: EOF
+    line: "disable-user-list=true" 
+
+- name: Download ubuntu-gdm-set-background
+  get_url: 
+    url: 'https://github.com/PRATAP-KUMAR/ubuntu-gdm-set-background/archive/main.tar.gz'
+    dest: /tmp
+    mode: '0755'
+
+- name: Unarchive ubuntu-gdm-set-background /opt
+  unarchive: 
+    remote_src: yes
+    src: /tmp/ubuntu-gdm-set-background-main.tar.gz
+    dest: /etc
+    owner: root
+    group: root
+    mode: '0740'
+
+- name: Download ubuntu-gdm-set-background
+  shell: wget -qO - https://github.com/PRATAP-KUMAR/ubuntu-gdm-set-background/archive/main.tar.gz | tar zx --strip-components=1 ubuntu-gdm-set-background-main/ubuntu-gdm-set-background 
+
+- name: copy image from local to remote source
+  copy:
+    src: /etc/ansible/files/lockscreen_labs.png
+    dest: /etc/ubuntu-gdm-set-background-main
+  
+- name: copy image from local to remote source
+  copy:
+    src: /etc/ansible/files/ubuntu-logo.png
+    dest: /usr/share/plymouth
+
+- name: install dependencies
+  apt:
+    name: libglib2.0-dev-bin
+    state: present
+
+- name: set login screen
+  shell: ./ubuntu-gdm-set-background --image /etc/ubuntu-gdm-set-background-main/lockscreen_labs.png
+  args:
+   chdir: /etc/ubuntu-gdm-set-background-main
+  register: gdm_result
+  failed_when: gdm_result.rc != 0
+  ignore_errors: yes
+
+- name: disable lock screen
+  shell: gsettings set org.gnome.desktop.lockdown disable-lock-screen 'true'

@@ -1,0 +1,19 @@
+- name: remove the old emacs package, if any
+  apt:
+    name:
+      - emacs
+      - emacs-common
+    state: absent
+    autoremove: yes
+
+- name: add emacs repository
+  apt_repository:
+    repo: 'ppa:kelleyk/emacs'
+    state: present
+
+# Acho que poderia deixar o emacs do repo ubuntu
+# Com ppa iremos precisar atualizar o número da versão
+- name: install emacs package
+  apt:
+    name: emacs28
+    state: present

@@ -1,0 +1,68 @@
+- name: Testando playbook 
+  hosts: VMtest
+  gather_facts: yes
+  vars:
+    base_url_rabbitmq: https://github.com/rabbitmq/rabbitmq-server/releases/latest
+
+  tasks: 
+
+    - name: Get content
+      uri:
+        url: '{{ base_url_rabbitmq }}'
+        method: GET
+        return_content: yes
+      register: data
+
+    - name: File name rabbitmq
+      set_fact:
+        filename_rabbitmq: "{{ data.content | regex_search('rabbitmq-server-(.*).tar.xz') }}"
+    - debug: msg={{filename_rabbitmq}}
+
+    - name: File name
+      set_fact:
+        filerabbit: "{{filename_rabbitmq | regex_replace ('.tar.xz','')}}"
+
+    
+    # - set_fact: 
+    #    file_name: "{{ filename_rabbitmq | regex_search('(\\S*)tgz.xz }}"
+
+    - debug: var=filerabbit
+
+  #  - meta: end_host
+
+    - name: Version rabbitmqserver
+      set_fact:
+        version_rabbitmq: "{{ filename_rabbitmq | regex_search('[0-9]+(\\.[0-9]+)+') }}"
+    - debug: msg={{version_rabbitmq}}
+
+    - name: Url Rabbitserver download
+      set_fact:
+        url_rabbitmq: "{{ base_url_rabbitmq | regex_replace ('latest','download/v') }}{{ version_rabbitmq }}/{{ filename_rabbitmq }}"
+
+    - debug: msg={{url_rabbitmq}}
+
+#    - meta: end_host
+
+    - name: Download RabbitMQ
+      get_url: 
+        url: '{{ url_rabbitmq }}'
+        dest: /tmp
+        force_basic_auth: yes
+        owner: root
+        mode: '0755'
+
+    - name: descompactar Rabbitmq em /usr/local
+      unarchive:
+        src: /tmp/{{filename_rabbitmq}}
+        dest: /usr/local
+        remote_src: yes
+
+# Ajustar versão com regex
+    - name: modifiyng bash file
+      lineinfile:
+        path: /etc/bash.bashrc
+        state: present
+        # regexp: '^%"export PATH=\$PATH:/usr/local/{{filerabbit}}/sbin"$'
+        # line:  "\"export PATH=\\$PATH:/usr/local/{{filerabbit}}/sbin\""
+        regexp: '^%"export PATH=\$PATH:/usr/local/{{filerabbit}}/"$'
+        line:  "\"export PATH=\\$PATH:/usr/local/{{filerabbit}}\""        

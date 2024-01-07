@@ -1,0 +1,17 @@
+- name: Testando playbook 
+  hosts: VMtest
+  gather_facts: yes
+
+  tasks:
+  # Ajustar versão com regex
+    - name: Download Foxit Reader
+      get_url: 
+        url: 'https://www.foxit.com/downloads/latest.html?product=Foxit-Reader&platform=Linux-64-bit&version=&package_type=&language=English&distID='
+        dest: /tmp
+
+    - name: Unarchive on /opt
+      unarchive: 
+        remote_src: yes
+        src: /tmp/FoxitReader.enu.setup.2.4.5.0727.x64.run.tar.gz
+        dest: /tmp
+        mode: '0744'

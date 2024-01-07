@@ -1,0 +1,40 @@
+---
+- name: Get content
+  uri: 
+    url: '{{ base_url_eclipse }}/release.xml'
+    method: GET
+    return_content: yes
+  register: data
+
+#------- get latest version name
+- set_fact:
+    latest_version: "{{data.content | regex_search('\\<present>20(.*)R') | regex_search('20(.*)[0-9]')}}"
+
+#------- join base url with latest version name
+- set_fact:
+    full_eclipse_url: '{{ base_url_eclipse }}{{ latest_version }}/R/eclipse-jee-{{ latest_version }}-R-linux-gtk-x86_64.tar.gz'
+
+#------- get file name and version 
+- set_fact: 
+    file_name: '{{ full_eclipse_url | basename }}'
+
+
+- name: Download EclipseIDE
+  get_url: 
+    url: '{{ full_eclipse_url }}'
+    dest: /tmp/{{ file_name }}
+
+
+- name: Unarchive EclipseIDE on /opt
+  unarchive: 
+    remote_src: yes
+    src: /tmp/{{ file_name }}
+    dest: /opt/    
+
+- name: Create EclipseIDE desktop entry
+  template:
+    src: /etc/ansible/roles/preparImageLin/templates/eclipse.j2
+    dest: /usr/share/applications/eclipse.desktop
+    owner: root
+    group: root
+    mode: 0644

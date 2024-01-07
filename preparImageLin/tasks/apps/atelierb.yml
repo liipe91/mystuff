@@ -1,0 +1,41 @@
+# - set_fact:
+#     version: 4.7.1p1
+- name: Get content
+  uri: 
+    url: 'https://www.atelierb.eu/en/atelier-b-support-maintenance/download-atelier-b/'
+    method: GET
+    return_content: yes
+  register: data
+
+# - set_fact:
+#     full_url_version: "{{data.content | regex_search('Windows 11\\</li\\>\\<li\\>\\<strong\\>\\<a(.*)www\\.atelierb(.*)\\-linux\\_x64\\.deb') | regex_search('https\\:(.*)\\.deb') }}"
+
+- set_fact:
+    full_url_version: "{{data.content | regex_search('www\\.atelierb(\\S*)\\-linux\\_x64\\.deb')}}"
+
+- set_fact:
+    filename: "{{ full_url_version | basename }}"
+
+- set_fact:
+    version: "{{ filename | regex_search('free\\-(\\S*)\\-linux', '\\1') }}"
+
+- name: download Atelier B
+  get_url:
+    url: "https://{{ full_url_version }}"
+    dest: /tmp
+    owner: root 
+    mode: '0755'
+
+- name: Install Atelier B package
+  shell: dpkg -i {{ filename }}
+  args:
+    chdir: /tmp
+  
+- name: Check if desktop file exists
+  stat:
+    path: /opt/atelierb-free-{{ version[0] }}/bbin/AtelierB.desktop
+  register: file
+
+- name: Add Atelier B desktop entry
+  shell: cp /opt/atelierb-free-{{ version[0] }}/bbin/AtelierB.desktop /usr/share/applications
+  when: file.stat.exists

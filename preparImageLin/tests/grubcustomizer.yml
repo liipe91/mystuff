@@ -1,0 +1,16 @@
+- name: Testando playbook 
+  hosts: VMtest
+  gather_facts: yes
+
+  tasks:  
+  
+  - name: Add Grub Customizer repository
+      apt_repository:
+        repo: ppa:danielrichter2007/grub-customizer
+        state: present
+
+  - name: Install Grub Customizer
+      apt:
+        name: grub-customizer
+        state: present
+        update_cache: yes

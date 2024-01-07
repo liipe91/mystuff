@@ -1,0 +1,21 @@
+# Houve problema em colocar essa flag direto na task apt?
+- name: Run apt update
+  apt:
+    update_cache: yes
+
+- name: Let non root to capture traffic
+  debconf:  
+    name='wireshark-common'
+    question='wireshark-common/install-setuid'
+    vtype='boolean'
+    value='true'
+
+- name: Install Wireshark gui package
+  apt:
+    name: 'wireshark'
+    state: present
+
+- name: Modifying permission on dumpcap bin
+  file:
+    path: /usr/bin/dumpcap
+    mode: '0755'

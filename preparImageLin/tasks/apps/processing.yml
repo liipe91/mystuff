@@ -1,0 +1,34 @@
+---
+# - name: Get content
+#   uri: 
+#     url: "{{ base_url_processing }}"
+#     method: GET
+#     return_content: yes
+#   register: data
+
+# - set_fact: 
+#     full_url_latest: "{{ data.content | regex_search('https(\\S*)linux-x64.tgz') }}"
+
+- set_fact:
+    file_name: "{{ full_url_latest | basename}}"
+
+- name: baixando processing IDE
+  get_url:
+    url: '{{ full_url_latest }}'
+    dest: /tmp/{{ file_name }}
+
+- name: extraindo processing IDE
+  unarchive:
+    remote_src: yes
+    src: /tmp/{{ file_name }}
+    dest: /opt/
+    list_files: yes
+  register: processing_dir_extracted
+
+- name: Create processing IDE desktop entry
+  template:
+    src: /etc/ansible/roles/preparImageLin/templates/processing.j2
+    dest: /usr/share/applications/processing.desktop
+    owner: root
+    group: root
+    mode: 0644

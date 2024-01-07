@@ -1,0 +1,42 @@
+# - name: get latest version {{ app_name }}
+#   shell: snap info mysql-worbench-community | grep latest/stable | awk '{ print $2 }'
+#   register: app_latest_version
+
+# Ajustar versão com regex
+- name: Download MySQLWorkbench
+  get_url: 
+    url: https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-community_8.0.31-1ubuntu22.10_amd64.deb
+    dest: /tmp
+
+
+# - name: download mysql workbench configuration file
+#   get_url:
+#     url: 'https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb'
+#     dest: /tmp/mysql-apt-config_0.8.23-1_all.deb
+#     owner: root
+#     mode: '0754'
+
+
+# - name: check mysql-server is installed
+#   apt:
+#     name: mysql-server
+#     update_cache: yes
+
+- name: install mysql workbench configuration file
+  shell: dpkg -i mysql-workbench-community*.deb
+  args:
+    chdir: /tmp
+
+# - name: get key
+#   shell: apt-key export 3A798D29 | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/mysql-key.gpg
+  
+
+# - name: install mysql workbench
+#   apt:
+#     name: mysql-workbench-community
+#     update_cache: yes
+
+# - name: checking if mysql service is enabled
+#   service:
+#     name: mysql
+#     enabled: yes

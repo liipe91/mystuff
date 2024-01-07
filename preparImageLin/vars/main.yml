@@ -1,0 +1,56 @@
+---
+allow_users_ssh: user ansible
+
+install_softs_apt:
+  - git
+  - uidmap
+  - codeblocks
+  - coq
+  - coqide
+  - python3
+  - libreoffice
+  - vim
+  - nasm
+  - qemu
+  - qemu-system-x86
+  - gcc-multilib
+  - gcc
+  - libpthread-stubs0-dev
+  - libglib2.0-dev-bin
+  - nodejs
+  - ghc
+  - opam
+  - openjdk-17-jdk
+  - virtualbox
+  - build-essential
+  - curl
+  - golang-go
+  - net-tools
+  - puredata
+  - gnome-tweaks
+  - r-base
+  
+
+base_url_docker_compose: https://github.com/docker/compose/releases/latest
+
+# ----------------------------------------------------------------------------------------------------------------------------
+# base_url_processing: https://github.com/processing/processing4/releases/latest
+
+full_url_latest: https://github.com/processing/processing4/releases/download/processing-1293-4.3/processing-4.3-linux-x64.tgz
+# -----------------------------------------------------------------------------------------------------------------------------
+
+base_url_jetbrains: https://download.jetbrains.com
+
+jetbrains_softs:
+  - clion
+  - pycharm-community
+  - intellij-idea-community
+  - goland
+
+base_url_eclipse: http://eclipse.c3sl.ufpr.br/technology/epp/downloads/release/
+
+base_url_bonita: https://github.com/bonitasoft/bonita-platform-releases/releases/latest
+
+base_url_rabbitmq: https://github.com/rabbitmq/rabbitmq-server/releases/latest
+
+base_url_rstudio: https://posit.co/download/rstudio-desktop

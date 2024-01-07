@@ -1,0 +1,73 @@
+- name: Testando playbook 
+  hosts: VMtest
+  gather_facts: yes
+  
+  tasks: 
+
+    - name: Print all available facts
+      debug:
+        var: ansible_facts.distribution_release
+    - meta: end_host
+
+    - name: get latest version {{ app_name }}
+      shell: snap info mysql-workbench-community | grep latest/stable | awk '{ print $2 }'
+      register: app_latest_version
+
+#     - name: Get content
+#       uri: 
+#         url: 'https://downloads.mysql.com/archives/get/p/8/file/mysql-workbench-community_{{app_latest_version.stdout}}-1ubuntu{{ansible_facts.distribution_version}}_amd64.deb'
+#         method: GET
+#         return_content: yes
+#       register: data
+#     - set_fact:
+# #       full_url_version: "{{data.content | regex_search('www\\.atelierb(\\S*)\\-linux\\_x64\\.deb')}}"
+#         full_url_version: "{{data.content}}"
+#     - meta: end_host
+
+    # # Ajustar versão com regex
+    # - name: Download MySQLWorkbench
+    #   get_url: 
+    #     # url: https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-community_{{app_latest_version}}-1ubuntu{{ansible_facts.distribution_version}}_amd64.deb
+    #     url: https://dev.mysql.com/get/Downloads/MySQLGUITools/mysql-workbench-community_8.0.34-1ubuntu{{ansible_facts.distribution_version}}_amd64.deb
+    #     # url: 'https://downloads.mysql.com/archives/get/p/8/file/mysql-workbench-community_{{app_latest_version.stdout}}-1ubuntu{{ansible_facts.distribution_version}}_amd64.deb'
+    #     dest: /tmp
+
+    - name: Shell-wget
+      shell: wget 'https://downloads.mysql.com/archives/get/p/8/file/mysql-workbench-community_{{app_latest_version.stdout}}-1ubuntu{{ansible_facts.distribution_version}}_amd64.deb' -O /tmp/mysql-workbench-community_{{app_latest_version.stdout}}-1ubuntu{{ansible_facts.distribution_version}}_amd64.deb
+   # - meta: end_host 
+
+#https://downloads.mysql.com/archives/get/p/8/file/mysql-workbench-community_8.0.32-1ubuntu22.04_amd64.deb
+
+    # - name: download mysql workbench configuration file
+    #   get_url:
+    #     url: 'https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb'
+    #     dest: /tmp/mysql-apt-config_0.8.23-1_all.deb
+    #     owner: root
+    #     mode: '0754'
+
+
+    # - name: check mysql-server is installed
+    #   apt:
+    #     name: mysql-server
+    #     update_cache: yes
+    #- meta: end_host
+
+    - name: install mysql workbench configuration file
+      # shell: dpkg -i mysql-workbench-community_{{app_latest_version.stdout}}-1ubuntu{{ansible_facts.distribution_version}}_amd64.deb ; apt-get -fy install
+      shell: 'dpkg -i mysql-workbench-community_{{app_latest_version.stdout}}-1ubuntu{{ansible_facts.distribution_version}}_amd64.deb ; apt-get install -fy'
+      args:
+        chdir: /tmp
+
+    # - name: get key
+    #   shell: apt-key export 3A798D29 | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/mysql-key.gpg
+      
+
+    # - name: install mysql workbench
+    #   apt:
+    #     name: mysql-workbench-community
+    #     update_cache: yes
+
+    # - name: checking if mysql service is enabled
+    #   service:
+    #     name: mysql
+    #     enabled: yes

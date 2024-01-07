@@ -1,0 +1,79 @@
+- name: get content
+  uri:
+    url: 'https://sourceforge.net/projects/xampp/files/XAMPP%20Linux'
+    method: GET
+    return_content: yes
+  register: data
+
+- set_fact:
+    version: "{{data.content | regex_search('<tr title\\=\"(.*)\"\ c', '\\1') }}"
+
+
+# - set_fact:
+#     base_url: https://sourceforge.net/projects/xampp/files/XAMPP%20Linux
+ 
+# - set_fact:
+#     full_url: '{{ base_url }}/{{ version[0] }}/xampp-linux-x64-{{ version[0] }}-0-installer.run/download'
+
+# - debug: var=full_url
+# - meta: end_host
+
+# #sourceforge.net/projects/xampp/files/XAMPP%20Linux/
+# - name: download XAMPP
+#   get_url:
+#     url: 'full_url'
+#     dest: /tmp
+#     force_basic_auth: yes
+
+
+- name: copy xampp file from local to remote source
+  copy:
+    src: /etc/ansible/files/xampp-linux-x64-8.1.10-0-installer.run
+    dest: /tmp
+  
+- name: set run permission on XAMPP file
+  file:
+    path: /tmp/xampp-linux-x64-8.1.10-0-installer.run
+    mode: 0755
+
+- name: install XAMPP
+  shell: ./xampp-linux-x64-8.1.10-0-installer.run chdir=/tmp
+
+- name: Create XAMPP desktop entry
+  template:
+    src: /etc/ansible/roles/preparImageLin/templates/xampp.j2
+    dest: /usr/share/applications/xampp.desktop
+    owner: root
+    group: root
+    mode: 0644
+    
+- name: modifiyng sudoers file
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^ See sudoers'
+    insertafter: '# See sudoers'
+    line: 'ALL ALL= NOPASSWD: /opt/lampp/*'
+    validate: '/usr/sbin/visudo -cf %s'
+
+- name: modifiyng bash file
+  lineinfile:
+    path: /etc/bash.bashrc
+    state: present
+    regexp: "^%\\#Aliases XAMPP$"
+    line: "\n# Aliases XAMPP"
+
+- name: modifiyng bash file
+  lineinfile:
+    path: /etc/bash.bashrc
+    state: present
+    regexp: "^%alias lampp='sudo /opt/lampp/lampp'$"
+    line: "alias lampp='sudo /opt/lampp/lampp'"
+
+- name: modifiyng bash file
+  lineinfile:
+    path: /etc/bash.bashrc
+    state: present
+    regexp: "^%alias xampp='sudo /opt/lampp/lampp'$"
+    line: "alias xampp='sudo /opt/lampp/lampp'"  
+

@@ -1,0 +1,18 @@
+- name: Verificar se há bloqueio do APT
+  wait_for:
+    path: /var/lib/dpkg/lock
+    state: absent
+  ignore_errors: yes
+  
+- name: Parar os processos do APT, se houver
+  shell: killall apt apt-get
+  ignore_errors: yes
+  
+- name: Esperar um pouco antes de verificar novamente
+  pause:
+    seconds: 5
+    
+- name: Verificar se ainda há bloqueio do APT
+  wait_for:
+    path: /var/lib/dpkg/lock
+    state: absent

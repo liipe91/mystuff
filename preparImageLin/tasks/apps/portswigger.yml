@@ -1,0 +1,21 @@
+- name: Get content
+  uri: 
+    url: 'https://portswigger.net/burp/releases/community/latest'
+    method: GET
+    return_content: yes
+  register: data
+
+- set_fact:
+    latest_version: "{{ data.content | regex_search('Community ([0-9]+(\\.[0-9]+)+)', '\\1') }}"
+
+- name: download Port Swingger
+  get_url:
+    url: 'https://portswigger-cdn.net/burp/releases/download?product=community&version={{ latest_version[0] }}&type=Linux'
+    dest: /tmp/burpsuite_community_linux_{{ latest_version[0] }}.sh
+    owner: root 
+    mode: '0755'
+
+- name: start .sh
+  shell: sh burpsuite_community_linux_{{ latest_version[0] }}.sh -q
+  args:
+    chdir: /tmp

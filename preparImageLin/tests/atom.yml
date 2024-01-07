@@ -1,0 +1,23 @@
+# - name: Parsing GPG key Sublime Text
+#   shell: wget -O- https://packagecloud.io/AtomEditor/atom/gpgkey| gpg --dearmor | tee /etc/apt/trusted.gpg.d/atom.gpg
+
+- name: Testando playbook 
+  hosts: VMtest
+  gather_facts: yes
+
+  tasks:
+  - name: instalar apt key
+    apt_key:
+      url: https://packagecloud.io/AtomEditor/atom/gpgkey
+      state: present
+
+  - name: Importar respositorio do Atom
+    apt_repository: 
+      repo: "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any any main"
+      filename: atom
+      state: present
+
+  - name: Instalar Atom  
+    apt:
+      name: atom
+      state: present

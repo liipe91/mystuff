@@ -1,0 +1,120 @@
+- name: Testando playbook 
+  hosts: g3c23
+  gather_facts: yes
+
+  vars: 
+    base_url_processing: https://github.com/processing/processing4/releases/latest
+
+  tasks:
+
+  - name: Get content
+    uri: 
+      url: "{{ base_url_processing }}"
+      method: GET
+      return_content: yes
+    register: data
+
+  - name: File name
+    set_fact:
+      filename_processing: "{{ data.content | regex_search('processing-(.*)-linux-64.tgz') }}"
+      
+  - debug: var=filename_processing
+
+  # - name: Version Processing
+  #   set_fact:
+  #     version_processing: "{{ data.content | regex_search ('[0-9]+-\d.\d/processing-\d.\d-linux-x64.tgz }}"
+
+  # - debug: var=version_processing
+
+  - meta: end_host    
+
+  - set_fact: 
+      full_url_latest: "{{ data.content | regex_search('https(\\S*)linux-x64.tgz') }}"
+
+  - set_fact:
+      file_name: "{{ full_url_latest | basename}}"
+
+  - name: baixando processing IDE
+    get_url:
+      url: '{{ full_url_latest }}'
+      dest: /tmp/{{ file_name }}
+
+  - name: extraindo processing IDE
+    unarchive:
+      remote_src: yes
+      src: /tmp/{{ file_name }}
+      dest: /opt/
+      list_files: yes
+    register: processing_dir_extracted
+
+  - name: Create processing IDE desktop entry
+    template:
+      src: /etc/ansible/roles/preparImageLin/templates/processing.j2
+      dest: /usr/share/applications/processing.desktop
+      owner: root
+      group: root
+      mode: 0644
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  # - name: Testando playbook 
+  #   hosts: VMtest
+  #   gather_facts: yes
+
+  #   vars:
+  #     base_url_processing: https://processing.org/download
+  #     full_url_latest: https://github.com/processing/processing4/releases/download/processing-1292-4.2/processing-4.2-linux-x64.tgz
+
+  #   tasks:
+  #   # - name: Get content
+  #   #   uri: 
+  #   #     url: "{{ base_url_processing }}"
+  #   #     method: GET
+  #   #     return_content: yes
+  #   #   register: data
+
+  #   # - set_fact: 
+  #   #     full_url_latest: "{{ data.content | regex_search('https(\\S*)linux-x64.tgz') }}"
+
+  #   - set_fact:
+  #       file_name: "{{ full_url_latest | basename}}"
+
+  #   - name: baixando processing IDE
+  #     get_url:
+  #       url: '{{ full_url_latest }}'
+  #       dest: /tmp/{{ file_name }}
+
+  #   - name: extraindo processing IDE
+  #     unarchive:
+  #       remote_src: yes
+  #       src: /tmp/{{ file_name }}
+  #       dest: /opt/
+  #       list_files: yes
+  #     register: processing_dir_extracted
+
+  #   - name: Create processing IDE desktop entry
+  #     template:
+  #       src: /etc/ansible/roles/preparImageLin/templates/processing.j2
+  #       dest: /usr/share/applications/processing.desktop
+  #       owner: root
+  #       group: root
+  #       mode: 0644

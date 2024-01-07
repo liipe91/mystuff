@@ -1,0 +1,109 @@
+- name: Testando playbook 
+  hosts: VMtest
+  gather_facts: yes
+
+  tasks:
+
+  # - name: Add GPG key PGAdmin
+  #   get_url:
+  #     url: https://www.pgadmin.org/static/packages_pgadmin_org.pub
+  #     dest: /etc/apt/trusted.gpg.d/pgadmin.gpg
+  #     mode: '0644'
+  #     force: true
+
+  # - name: Add PGadmin repository
+  #   apt_repository:
+  #     repo: 'deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/jammy pgadmin4 main'
+  #     filename: pgadmin4
+  #     update_cache: yes
+  #     state: present
+
+  # - name: instalar PGadmin
+  #   apt:
+  #     name: 
+  #       - pgadmin4
+  #     state: present
+
+  - name: Install postgresql packages 
+    apt: 
+      name: '{{ item }}' 
+      state: present
+    with_items:
+      - postgresql
+      # - postgresql-server
+
+  - name: Start and enable service
+    service:
+      name: postgresql
+      state: restarted
+      enabled: yes
+
+  - name: Get version installed   
+    shell: psql --version | awk '{ print $3 }'
+    register: pre_version
+
+  - set_fact:
+      version: "{{pre_version.stdout | regex_search('[0-9][0-9]')}}"
+
+  - set_fact:
+      path_psql: '/etc/postgresql/{{version}}/main/postgresql.conf'
+      
+  - name: alterar postgresql.conf
+    lineinfile:
+      path: '{{path_psql}}'
+      regexp: '^listen_addresses'
+      insertafter: '#listen_addresses'
+      line: listen_address = '*'
+
+  - name: modifiyng sudoers file
+    lineinfile:
+      path: /etc/sudoers
+      regexp: '^ See sudoers'
+      insertbefore: '# See sudoers'
+      line: 'ALL ALL=(postgres) NOPASSWD: /bin/sudo -i -u postgres'
+      validate: '/usr/sbin/visudo -cf %s'
+
+
+
+
+
+
+
+
+
+  # - name: "Create app database"
+  #   postgresql_db:
+  #     state: present
+  #     name: "user"
+  #   become: yes
+  #   become_user: postgres
+
+  # - name: "Create db user"
+  #   postgresql_user:
+  #     state: present
+  #     name: "user"
+  #     password: ""
+  #   become: yes
+  #   become_user: postgres
+
+  # - name: "Grant db user access to app db"
+  #   postgresql_privs:
+  #     type: database
+  #     database: "user"
+  #     roles: "user"
+  #     grant_option: no
+  #     privs: all
+  #   become: yes
+  #   become_user: postgres
+
+    # - name: "Allow md5 connection for the db user"
+    #   postgresql_pg_hba:
+    #     dest: "~/data/pg_hba.conf"
+    #     contype: host
+    #     databases: all
+    #     method: md5
+    #     users: "{{ db_user }}"
+    #     create: true
+    #   become: yes
+    #   become_user: postgres
+    #   notify: restart postgres

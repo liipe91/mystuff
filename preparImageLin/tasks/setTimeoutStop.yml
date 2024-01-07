@@ -1,0 +1,10 @@
+- name: Diminuir tempo de desligamento
+  lineinfile:
+    # path: ./system.conf
+    path: /etc/systemd/system.conf
+    regexp: '^DefaultTimeoutStopSec='
+    insertafter: '^#DefaultTimeoutStopSec='
+    line: DefaultTimeoutStopSec=10s
+  notify: reload systemd
+  # delegate_to: localhost
+

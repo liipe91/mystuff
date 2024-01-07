@@ -1,0 +1,13 @@
+#!/bin/bash
+
+MAKER_FILE="${HOME}/.docker_rootless_installed"
+
+if [ ! -f "$MAKER_FILE" ]; then
+    curl -fsSL https://get.docker.com/rootless | sh
+
+    echo "export PATH=/home/${USER}/bin:$PATH" >> ${HOME}/.bashrc
+    echo "export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/docker.sock" >> ${HOME}/.bashrc
+	systemctl –-user enable docker
+		
+	touch "$MAKER_FILE"
+fi

@@ -1,0 +1,33 @@
+- name: download Minikube
+  get_url: 
+    url: 'https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64'
+    dest: '/tmp/minikube-linux-amd64'
+    # mode: 'u=rx,go=rx'
+
+- name: install Minikube
+  copy: 
+    src: '/tmp/minikube-linux-amd64'
+    remote_src: yes
+    dest: /usr/local/bin/minikube
+    force: yes
+    mode: 'u=rwx,go=rx'
+
+- name: get latest version Kubernetes
+  uri:
+    url: 'https://dl.k8s.io/release/stable.txt'
+    method: GET
+    return_content: yes
+  register: data
+
+- name: download Kubernetes
+  get_url: 
+    url: 'https://dl.k8s.io/release/{{ data.content }}/bin/linux/amd64/kubectl'
+    dest: '/tmp/kubectl'
+
+- name: install Kubernetes
+  copy:
+    src: '/tmp/kubectl'
+    remote_src: yes
+    dest: '/usr/local/bin/kubectl'
+    force: yes
+    mode : 'u=rwx,go=rx'

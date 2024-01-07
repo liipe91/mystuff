@@ -1,0 +1,12 @@
+- name: Upgrade the OS (apt-get dist-upgrade)
+  apt:
+    upgrade: dist
+    update_cache: true
+
+- name: Instalar pacotes Apt
+  apt: 
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop: "{{ install_softs_apt }}"
+ 

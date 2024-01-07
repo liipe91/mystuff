@@ -1,0 +1,19 @@
+- name: Add GPG key PGAdmin
+  get_url:
+    url: https://www.pgadmin.org/static/packages_pgadmin_org.pub
+    dest: /etc/apt/trusted.gpg.d/pgadmin.gpg
+    mode: '0644'
+    force: true
+
+- name: Add PGadmin repository
+  apt_repository:
+    repo: 'deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/jammy pgadmin4 main'
+    filename: pgadmin4
+    update_cache: yes
+    state: present
+
+- name: instalar PGadmin
+  apt:
+    name: 
+      - pgadmin4
+    state: present

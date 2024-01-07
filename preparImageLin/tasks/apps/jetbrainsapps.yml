@@ -1,0 +1,77 @@
+---
+#Install Jetbrains IDE'S
+- set_fact: 
+    app_name: "{{ item }}"
+    
+- name: get latest version {{ app_name }}
+  shell: snap info {{ app_name }} | grep latest/stable | awk '{ print $2 }'
+  register: app_latest_version
+
+- set_fact:
+    app_full_url: '{{ base_url_jetbrains }}/cpp/CLion-{{ app_latest_version.stdout }}.tar.gz'
+  when: "'clion' in app_name"
+
+- set_fact:
+    app_full_url: '{{ base_url_jetbrains }}/go/goland-{{ app_latest_version.stdout }}.tar.gz'
+  when: "'goland' in app_name"
+
+- set_fact:
+    app_full_url: '{{ base_url_jetbrains }}/python/pycharm-community-{{ app_latest_version.stdout }}.tar.gz'
+  when: "'pycharm-community' in app_name"
+
+- set_fact:
+    app_full_url: '{{ base_url_jetbrains }}/idea/ideaIC-{{ app_latest_version.stdout }}.tar.gz'
+  when: "'intellij-idea-community' in app_name"
+
+- name: Download {{ app_name }} latest version
+  get_url:
+    url: '{{ app_full_url }}'
+    dest: /tmp/
+  register: file
+ 
+- set_fact:
+    file_name: '{{ app_full_url | basename }}'
+  
+- name: Descompactar {{ app_name }} em /opt
+  unarchive: 
+    remote_src: yes
+    src: /tmp/{{ file_name }}
+    dest: /opt/
+    list_files: yes
+  register: app_directory
+
+- name: Create PyCharm Community desktop entry
+  template:
+    src: /etc/ansible/roles/preparImageLin/templates/pycharm.j2
+    dest: /usr/share/applications/pycharm.desktop
+    owner: root
+    group: root
+    mode: 0644
+  when: "'pycharm-community' in app_name"
+
+- name: Create CLion Community desktop entry
+  template:
+    src: /etc/ansible/roles/preparImageLin/templates/clion.j2
+    dest: /usr/share/applications/clion.desktop
+    owner: root
+    group: root
+    mode: 0644
+  when: "'clion' in app_name"
+
+- name: Create IntelliJ Idea Community desktop entry
+  template:
+    src: /etc/ansible/roles/preparImageLin/templates/intellij.j2
+    dest: /usr/share/applications/intellij.desktop
+    owner: root
+    group: root
+    mode: 0644
+  when: "'intellij-idea-community' in app_name"
+
+- name: Create Goland Community desktop entry
+  template:
+    src: /etc/ansible/roles/preparImageLin/templates/goland.j2
+    dest: /usr/share/applications/goland.desktop
+    owner: root
+    group: root
+    mode: 0644
+  when: "'goland' in app_name"

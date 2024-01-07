@@ -1,0 +1,9 @@
+---
+grub_password_v2_user: user
+grub_password_v2_passwd: grub.pbkdf2.sha512
+grub_password_v2_unrestricted: true
+
+grub_password_version: 2
+grub_password_unrestricted_files:
+  - /etc/grub.d/10_linux
+  - /etc/grub.d/20_linux_xen

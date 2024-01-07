@@ -1,0 +1,42 @@
+- set_fact:
+    grub_password_file: /etc/grub.d/00_header
+    grub_password_user: |
+      cat << EOF
+      set superusers="user"
+      password_pbkdf2 user grub.pbkdf2.sha512      EOF
+ 
+- name: "grub v2 | add superuser password"
+  lineinfile: 
+    dest: "{{ grub_password_file }}"
+    regexp: "{{ grub_password_user }}"
+    state: present
+    insertafter: EOF
+    line: '{{ grub_password_user }}'
+  notify: update grub
+
+- name: Comentar CLASS antes de alterar 10_linux
+  replace:
+    path: /etc/grub.d/10_linux
+    regexp: '{{ item.reg }}'
+    replace: '{{ item.rep }}'
+  loop: 
+    - { reg: '^CLASS=', rep: '#CLASS="--class gnu-linux --class gnu --class os --class xen"' }
+
+- name: Setar CLASS unrestricted 10_linux
+  lineinfile:
+    path: /etc/grub.d/10_linux
+    regexp: "{{ item.reg }}"
+    insertafter: "{{ item.ins }}"
+    line: "{{ item.lin }}"
+  loop: 
+    - { reg: '^CLASS=', ins: '^#CLASS=', lin: 'CLASS="--class gnu-linux --class gnu --class os --class xen --unrestricted"' }
+  notify: update grub
+
+- name: Aplica unrestricted no arquivo /etc/grub.d/30_os-prober para Windows no grub - Linux
+  replace:
+    path: /etc/grub.d/30_os-prober
+    regexp: '--class os \\'
+    replace: '--class os --unrestricted \\'
+  notify:
+    - update grub
+

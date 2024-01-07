@@ -1,0 +1,38 @@
+- name: Testando playbook 
+  hosts: VMtest
+  gather_facts: yes
+
+
+  tasks:
+  - name: Get content
+    uri: 
+      #url: 'https://www.rstudio.com/products/rstudio/download/#download'
+      url: 'https://posit.co/download/rstudio-desktop'
+      method: GET
+      force_basic_auth: yes
+      return_content: yes
+    register: data
+
+  - set_fact:
+      #full_url: "{{ data.content | regex_search('https://download1.rstudio.org/electron/jammy(\\S*)-amd64.deb') }}"
+      #full_url: "{{ data.content | regex_search('https://download1.rstudio.org/electron/jammy/amd64/rstudio-(\\S*)-amd64.deb') }}"
+      # full_url: "{{ data.content | regex_search('https://download1.rstudio.org/electron//{{{ansible_facts.distribution_release}}}//amd64/rstudio-(\\S*)-amd64.deb') }}"
+      full_url: "{{ data.content | regex_search('https://download1.rstudio.org/electron/' ~ ansible_facts.distribution_release ~ '/amd64/rstudio-(\\S*)-amd64.deb') }}"
+  - debug: msg="{{ full_url }}"
+  
+  # - meta: end_host
+
+  - name: download R Studio IDE
+    get_url:
+      url: "{{ full_url }}"
+      dest: /tmp
+      force_basic_auth: yes
+      owner: root 
+      mode: '0755'
+
+  - set_fact:
+      file_name: '{{ full_url | basename }}'
+
+  - name: Install R Studio IDE
+    apt: 
+      deb: "/tmp/{{ file_name }}"

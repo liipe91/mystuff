@@ -1,1 +1,1 @@
-Playbooks to install some packges on Linux.
+Playbooks to install some packages on Linux.
